@@ -61,3 +61,5 @@ group :development do
 end
 
 gem 'devise'
+gem "omniauth-google-oauth2"
+gem 'omniauth-rails_csrf_protection'
