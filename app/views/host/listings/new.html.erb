@@ -1,0 +1,17 @@
+<h1>List your property</h1>
+
+<form action="/host/listings" method="post">
+    <input type="hidden" name="authenticity_token" value="<%= form_authenticity_token %>">
+
+    <label for="title">Title <br>
+        <input type="text" name="listing[title]" id="title" value="<%= @listing.title %>">
+    </label>
+
+    <label for="about">About </label>
+    <textarea id="about" name="listing[about]"><%= @listing.about %></textarea>
+
+    <label for="max_guests">How many people maxium can stay? </label>
+    <input type="number" name="listing[title]" id="max_guests" value="<%= @listing.max_guests %>" min="1" max="100" step="1">
+
+    <input type="submit" value="Create listing">
+</form>
