@@ -2,7 +2,7 @@
 
 Fecha: 11 de noviembre de 2026.
 
-Estado: primera definición de implementación. La modalidad diaria y React + API Rails fueron confirmados por Ulises. Las demás reglas son decisiones de trabajo propuestas para el MVP, no acuerdos comerciales ni funcionalidades implementadas.
+Estado: modalidad diaria, React + API Rails, USD, UTC−3 y cancelación hasta 24 horas antes confirmados por Ulises. Confirmación automática sin pagos y modalidad sin capitán separado siguen como propuestas del MVP.
 
 ## 1. Producto y límites
 
@@ -16,9 +16,9 @@ Homeharbor permite publicar botes completos y reservarlos por días. El recorrid
 | Cuentas | Una misma cuenta puede reservar y publicar; permisos por propiedad, sin administrador en el MVP | Propuesta de alcance |
 | Confirmación | Automática al crear una reserva válida | Propuesta de alcance |
 | Pagos | Fuera del MVP; una reserva confirmada no significa que esté pagada | Propuesta de alcance |
-| Cancelación | El cliente puede cancelar antes del inicio; se conserva la operación | Propuesta de alcance |
-| Moneda | USD como moneda única de demostración, siempre explícita en pantalla | Propuesta, revisar antes de E3 |
-| Zona horaria | `America/Argentina/Buenos_Aires` para el puerto de demostración; cada bote guarda una zona IANA | Propuesta, revisar antes de E3 |
+| Cancelación | Hasta 24 horas antes del inicio, inclusive; se conserva la operación | Confirmada por Ulises |
+| Moneda | Dólares estadounidenses (USD), siempre explícitos en pantalla | Confirmada por Ulises |
+| Zona horaria | UTC−3 fijo, sin horario de verano; identificador IANA `Etc/GMT+3` | Confirmada por Ulises |
 | Capitán | Sin contratación ni disponibilidad separada de capitán en el MVP | Propuesta, revisar antes de E3 |
 | Google | Pospuesto hasta terminar el acceso con correo y contraseña; no debe bloquear el arranque | Decisión de secuenciación |
 
@@ -28,7 +28,7 @@ La fase de demostración no incluye cobros, depósitos, reembolsos, verificació
 
 ### Fechas y precio
 
-- `starts_on` y `ends_on` son fechas ISO `YYYY-MM-DD`, interpretadas en la zona del bote.
+- `starts_on` y `ends_on` son fechas ISO `YYYY-MM-DD`, interpretadas en UTC−3 fijo (`Etc/GMT+3`).
 - El intervalo incluye el inicio y excluye el fin: del 10 al 12 de diciembre ocupa los días 10 y 11 y cuesta dos tarifas diarias.
 - La interfaz debe decir «Primer día de uso» y «Disponible nuevamente desde» y mostrar los días incluidos y la cantidad total. El fin exclusivo no debe quedar escondido en un calendario.
 - Duración mínima: un día; `ends_on` debe ser posterior a `starts_on`.
@@ -55,12 +55,12 @@ La fase de demostración no incluye cobros, depósitos, reembolsos, verificació
 - Desactivar impide nuevas reservas; no cancela reservas existentes ni las borra.
 - No se permite reducir capacidad por debajo del número de pasajeros de reservas confirmadas aún no terminadas.
 - La zona del bote no puede cambiar mientras tenga reservas confirmadas aún no terminadas.
-- Cancelar antes de las 00:00 del primer día, según la zona guardada, cambia el estado a `cancelled`. Repetir una cancelación propia ya completada devuelve el estado actual.
+- Se permite cancelar cuando `ahora <= inicio - 24 horas`, incluido el instante exacto del límite. El inicio de una reserva diaria es a las 00:00 UTC−3 del primer día. Por ejemplo, para comenzar el 10 de diciembre se permite cancelar hasta el 9 a las 00:00 UTC−3 (03:00 UTC). Después se responde `409 cancellation_closed`. Repetir una cancelación propia ya completada devuelve su estado sin modificar el historial.
 - La cancelación por el propietario y los cambios de fechas quedan fuera del MVP; no tendrán endpoints hasta definir sus reglas.
 
 ### Escenarios de aceptación
 
-Usar un reloj de prueba fijado al 1 de diciembre de 2026 y un bote con capacidad de 6 personas, tarifa de USD 100/día y zona `America/Argentina/Buenos_Aires`.
+Usar un reloj de prueba fijado al 1 de diciembre de 2026 y un bote con capacidad de 6 personas, tarifa de USD 100/día y zona `Etc/GMT+3` (UTC−3 fijo).
 
 | Caso | Operación | Resultado |
 |---|---|---|
@@ -69,8 +69,8 @@ Usar un reloj de prueba fijado al 1 de diciembre de 2026 y un bote con capacidad
 | Contigua | Bruno pide del 12 al 13 | Confirmada, 1 día, USD 100 |
 | Concurrencia | Dos cuentas piden simultáneamente el mismo intervalo libre | Solo una confirmación; la otra recibe conflicto |
 | Reintento | Ana repite la misma solicitud con igual clave | Devuelve la reserva existente, no crea otra |
-| Cancelación | Ana cancela el día 9 | Conserva historial y libera los días 10 y 11 |
-| Cancelación tardía | Se intenta cancelar al comenzar el día 10 | Rechazada; no cambia estado ni disponibilidad |
+| Cancelación | Ana cancela el día 9 a las 00:00 UTC−3, exactamente 24 horas antes | Conserva historial y libera los días 10 y 11 |
+| Cancelación tardía | Se intenta cancelar el día 9 a las 00:00:01 UTC−3 | `409 cancellation_closed`; no cambia estado ni disponibilidad |
 | Permisos | Bruno intenta consultar o cancelar la reserva privada de Ana | `404`; no recibe datos de Ana |
 | Precio cambiado | La tarifa cambia tras la cotización | `409 price_changed`; el cliente revisa el nuevo total |
 | Capacidad | Se solicitan 7 pasajeros | `422 validation_failed` |
@@ -126,4 +126,4 @@ La elección de rangos y restricciones para disponibilidad se basa en la [docume
 - Diagnóstico reproducido: [E1_DIAGNOSTICO_ENTORNO.md](E1_DIAGNOSTICO_ENTORNO.md).
 - Seguimiento: [plan de entregables](../PLAN_ENTREGABLES.md).
 
-E0 deja definido el diseño inicial y ejemplos comprobables. Las propuestas de moneda, zona y reglas comerciales siguen identificadas como tales; deben revisarse antes de E3/E4. No hay migraciones ni API de reservas implementadas todavía.
+E0 deja definido el diseño inicial y ejemplos comprobables. USD, UTC−3 y el límite de cancelación de 24 horas están confirmados. Las demás propuestas comerciales siguen identificadas como tales. No hay migraciones ni API de reservas implementadas todavía.

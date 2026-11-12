@@ -34,7 +34,7 @@ Los enlaces de correo abren una pantalla frontend que envía el token a Rails. L
 
 ## Publicaciones — base de E3
 
-Implementadas las rutas siguientes; filtros, imágenes y restricciones dependientes de futuras reservas siguen pendientes. Listados paginados con `page` y `per_page`. USD es la moneda de demostración actual.
+Implementadas las rutas siguientes; filtros, imágenes y restricciones dependientes de futuras reservas siguen pendientes. Listados paginados con `page` y `per_page`. USD es la moneda acordada. UTC−3 fijo es la zona acordada; el identificador IANA es `Etc/GMT+3`.
 
 | Método | Ruta | Comportamiento | Acceso |
 |---|---|---|---|
@@ -59,8 +59,10 @@ Pendiente de implementación: estas rutas todavía no existen.
 | POST | `/reservations` | Validar cotización y crear una reserva confirmada; `201` | Sesión + CSRF + `Idempotency-Key` |
 | GET | `/me/reservations` | Solo reservas propias, paginadas | Sesión |
 | GET | `/me/reservations/:id` | Detalle propio, con resumen del bote incluido | Cliente dueño de la reserva |
-| POST | `/me/reservations/:id/cancellation` | Cancelar antes del inicio y liberar fechas; `200`, repetible | Cliente dueño + CSRF |
+| POST | `/me/reservations/:id/cancellation` | Cancelar hasta 24 horas antes del inicio, inclusive, y liberar fechas; `200`, repetible | Cliente dueño + CSRF |
 | GET | `/me/boats/:boat_id/reservations` | Reservas del bote propio, paginadas | Propietario del bote |
+
+Regla confirmada: inicio a las 00:00 UTC−3 del primer día; cancelación permitida cuando `ahora <= inicio - 24 horas`. Una reserva del día 10 admite cancelación hasta el día 9 a las 00:00 UTC−3, inclusive.
 
 Consulta de disponibilidad: responde `200` con `available: true/false`, `days`, `daily_rate_cents`, `total_cents`, `currency` y `time_zone`; valida también intervalo, capacidad y publicación. Una respuesta disponible no garantiza el resultado posterior de la reserva.
 
@@ -101,7 +103,7 @@ Los valores `expected_*` son una comprobación del importe visto por el cliente,
     "daily_rate_cents": 10000,
     "total_cents": 20000,
     "currency": "USD",
-    "time_zone": "America/Argentina/Buenos_Aires",
+    "time_zone": "Etc/GMT+3",
     "cancelled_at": null
   }
 }

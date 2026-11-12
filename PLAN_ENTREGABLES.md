@@ -8,10 +8,10 @@ Estado: trabajo iniciado el 11 de noviembre de 2026. E0 tiene una definición in
 
 - Confirmado por Ulises: bote completo por días y React + API Rails.
 - Preparado: [alcance y arquitectura de E0](docs/E0_ALCANCE_Y_ARQUITECTURA.md), con reglas propuestas y ejemplos verificables.
-- Preparado: [contrato inicial de la API](docs/API_V1.md), todavía sin implementación.
+- [Contrato de API](docs/API_V1.md): cuentas y publicaciones básicas implementadas; reservas pendientes.
 - Actualizado: Ruby 4.0.9, Rails 8.1.4.1, PostgreSQL 18.6 local y frontend React 19/Vite 8/Tailwind 4. Ver [informe y límites de verificación](docs/ACTUALIZACION_2026-11-11.md).
 - Confirmado e implementado: monorepo Homeharbor con `backend/` y `frontend/`. Registro, login, confirmación, recuperación y permisos de publicaciones conectados. Ver [E2 y verificaciones](docs/E2_UNIFICACION_Y_CUENTAS.md).
-- Por revisar antes de E3/E4: moneda y puerto de demostración, capitán y reglas comerciales propuestas. E0 no se considera completamente acordado mientras esas decisiones sigan pendientes.
+- Confirmado por Ulises: USD, UTC−3 fijo y cancelación hasta 24 horas antes del inicio, inclusive. Pendiente: capitán, puerto de demostración y confirmación automática sin pagos.
 
 ## Objetivo
 
@@ -36,8 +36,8 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 - Reservar el bote completo por días. Usar intervalos con inicio incluido y fin excluido; por ejemplo, del 10 al 12 representa dos días. Definir zona horaria del puerto y cómo se muestra esta regla al cliente.
 - Una cuenta puede reservar y publicar. No crear un rol de administrador hasta definir las acciones que lo requieren.
 - Confirmar reservas automáticamente cuando haya disponibilidad, sin pagos en esta primera versión.
-- Permitir cancelar antes del inicio; conservar historial y liberar fechas. Definir restricciones adicionales antes de implementar.
-- Elegir una sola moneda y guardar el precio acordado en cada reserva.
+- Permitir cancelar hasta 24 horas antes del inicio, inclusive; conservar historial y liberar fechas.
+- Usar USD y guardar el precio acordado en cada reserva.
 - No migrar usuarios ni reservas del proyecto académico salvo que se solicite expresamente. No reutilizar su ingreso por nombre.
 - Conservar atribuciones, autores y licencias de los componentes reutilizados.
 
@@ -59,7 +59,8 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 
 - [x] Confirmar reserva por días o por horarios y bote completo o plazas. Ulises eligió bote completo por días.
 - [ ] Confirmar necesidad de patrón/capitán; propuesta inicial sin contratación separada de capitán.
-- [ ] Confirmar moneda, zona horaria, reglas de cancelación y confirmación automática.
+- [x] Confirmar USD, UTC−3 fijo y cancelación con al menos 24 horas de antelación.
+- [ ] Confirmar la propuesta de confirmación automática sin pagos.
 - [x] Acordar React + API Rails. Confirmado por Ulises.
 - [x] Organización confirmada: consolidar frontend y backend en Homeharbor con la estructura de v2.
 - [x] Elegir el mecanismo de sesión para React y Rails; documentar cookies o tokens, cierre de sesión, expiración, CSRF y CORS según corresponda. Diseño en E0; implementación en E2.
@@ -104,7 +105,7 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 **Entrega:** publicar, editar, consultar y desactivar botes.
 
 - [x] Crear `Boat` relacionado con su propietario.
-- [x] Implementar campos y validaciones básicos de publicaciones; USD y zona horaria siguen como valores de demostración.
+- [x] Implementar campos y validaciones básicos de publicaciones. USD y UTC−3 fijo confirmados.
 - [ ] Implementar imágenes con límites de tipo y tamaño, almacenamiento y manejo de fallos.
 - [x] Crear «Mis botes», edición, activación y desactivación con permisos en el servidor.
 - [x] Desactivar publicaciones; no exponer borrado físico por API. Reservas pendientes.
@@ -137,7 +138,7 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 
 - [ ] Consultar «Mis reservas» filtrando por usuario en el servidor.
 - [ ] Mostrar detalle del bote, fechas, pasajeros, importe y estado sin depender del orden de carga de otras consultas.
-- [ ] Implementar cancelación autorizada con las reglas de E0 y liberación de disponibilidad.
+- [ ] Implementar cancelación autorizada hasta 24 horas antes del inicio, inclusive, y liberación de disponibilidad.
 - [ ] Mostrar al propietario las reservas de sus propios botes con solo los datos necesarios.
 - [ ] Enviar confirmaciones y cancelaciones; un fallo de correo no debe duplicar ni deshacer la reserva.
 - [ ] Revisar formularios, etiquetas, navegación con teclado y presentación móvil.
