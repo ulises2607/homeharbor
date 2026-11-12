@@ -2,7 +2,7 @@
 
 Fecha: 11 de noviembre de 2026.
 
-Estado: modalidad diaria, React + API Rails, USD, UTC−3 y cancelación hasta 24 horas antes confirmados por Ulises. Confirmación automática sin pagos y modalidad sin capitán separado siguen como propuestas del MVP.
+Estado: modalidad diaria, React + API Rails, USD, UTC−3 y cancelación hasta 24 horas antes confirmados por Ulises e implementados. La entrega E4/E5 aplica la propuesta inicial de confirmación automática sin pagos ni gestión separada de capitán; estas decisiones de alcance no tienen todavía confirmación explícita del usuario.
 
 ## 1. Producto y límites
 
@@ -14,12 +14,12 @@ Homeharbor permite publicar botes completos y reservarlos por días. El recorrid
 | Arquitectura | React para la interfaz, Homeharbor como API Rails y PostgreSQL | Confirmada por Ulises |
 | Repositorios | Monorepo `homeharbor`, con `backend/` y `frontend/`, siguiendo la estructura de v2 | Confirmado por Ulises e implementado |
 | Cuentas | Una misma cuenta puede reservar y publicar; permisos por propiedad, sin administrador en el MVP | Propuesta de alcance |
-| Confirmación | Automática al crear una reserva válida | Propuesta de alcance |
-| Pagos | Fuera del MVP; una reserva confirmada no significa que esté pagada | Propuesta de alcance |
+| Confirmación | Automática al crear una reserva válida | Propuesta aplicada en E4; pendiente ratificar |
+| Pagos | Fuera del MVP; una reserva confirmada no significa que esté pagada | Propuesta aplicada en E4; pendiente ratificar |
 | Cancelación | Hasta 24 horas antes del inicio, inclusive; se conserva la operación | Confirmada por Ulises |
 | Moneda | Dólares estadounidenses (USD), siempre explícitos en pantalla | Confirmada por Ulises |
 | Zona horaria | UTC−3 fijo, sin horario de verano; identificador IANA `Etc/GMT+3` | Confirmada por Ulises |
-| Capitán | Sin contratación ni disponibilidad separada de capitán en el MVP | Propuesta, revisar antes de E3 |
+| Capitán | Sin contratación ni disponibilidad separada de capitán en el MVP | Propuesta aplicada; pendiente ratificar |
 | Google | Pospuesto hasta terminar el acceso con correo y contraseña; no debe bloquear el arranque | Decisión de secuenciación |
 
 La fase de demostración no incluye cobros, depósitos, reembolsos, verificación de habilitaciones ni operación comercial. No se migran datos personales del proyecto académico.
@@ -126,4 +126,4 @@ La elección de rangos y restricciones para disponibilidad se basa en la [docume
 - Diagnóstico reproducido: [E1_DIAGNOSTICO_ENTORNO.md](E1_DIAGNOSTICO_ENTORNO.md).
 - Seguimiento: [plan de entregables](../PLAN_ENTREGABLES.md).
 
-E0 deja definido el diseño inicial y ejemplos comprobables. USD, UTC−3 y el límite de cancelación de 24 horas están confirmados. Las demás propuestas comerciales siguen identificadas como tales. No hay migraciones ni API de reservas implementadas todavía.
+E0 deja definido el diseño y ejemplos comprobables. USD, UTC−3 y el límite de cancelación de 24 horas están confirmados. Las demás propuestas comerciales siguen identificadas como tales. Migraciones, API, interfaz y pruebas de reservas/cancelaciones están implementadas; consultar [E4/E5](E4_RESERVAS.md). Los avisos por correo y la verificación en producción siguen pendientes.
