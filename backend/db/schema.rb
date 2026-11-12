@@ -10,9 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_02_27_235801) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_11_000100) do
   # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
+
+  create_table "boats", force: :cascade do |t|
+    t.bigint "owner_id", null: false
+    t.string "name", null: false
+    t.text "description", null: false
+    t.string "port", null: false
+    t.string "time_zone", default: "America/Argentina/Buenos_Aires", null: false
+    t.integer "capacity", null: false
+    t.integer "daily_rate_cents", null: false
+    t.string "currency", default: "USD", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["active", "id"], name: "index_boats_on_active_and_id"
+    t.index ["owner_id"], name: "index_boats_on_owner_id"
+    t.check_constraint "capacity > 0", name: "boats_positive_capacity"
+    t.check_constraint "daily_rate_cents > 0", name: "boats_positive_rate"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -29,7 +47,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_27_235801) do
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
     t.string "unconfirmed_email"
-    t.integer "failed_attempts"
+    t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token"
     t.datetime "locked_at"
     t.string "provider"
@@ -46,4 +64,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_02_27_235801) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "boats", "users", column: "owner_id"
 end

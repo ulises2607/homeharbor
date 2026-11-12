@@ -1,6 +1,21 @@
 Rails.application.routes.draw do
-  
-  root to: 'static_pages#home'
-  
-  devise_for :users, controllers: {omniauth_callbacks: 'users/omniauth_callbacks'}
+  get "up", to: "rails/health#show"
+  # Keep Devise's model mapping, without parallel HTML authentication endpoints.
+  devise_for :users, skip: :all
+  namespace :api do
+    namespace :v1 do
+      get "session/csrf", to: "sessions#csrf"
+      resource :session, only: %i[show create destroy]
+      resources :registrations, only: :create
+      resource :confirmations, only: %i[create update]
+      resource :passwords, only: %i[create update]
+      resources :boats, only: %i[index show create update] do
+        post :deactivation, on: :member
+        post :activation, on: :member
+      end
+      namespace :me do
+        resources :boats, only: %i[index show]
+      end
+    end
+  end
 end

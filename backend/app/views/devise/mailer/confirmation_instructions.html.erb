@@ -1,5 +1,4 @@
-<p>Welcome <%= @email %>!</p>
-
-<p>You can confirm your account email through the link below:</p>
-
-<p><%= link_to 'Confirm my account', confirmation_url(@resource, confirmation_token: @token) %></p>
+<p>Hola <%= @resource.name %>,</p>
+<p>Confirmá tu correo para ingresar a Homeharbor.</p>
+<p><%= link_to "Confirmar mi correo", account_link("confirm-email", "confirmation_token", @token) %></p>
+<p>Si no creaste esta cuenta, podés ignorar este mensaje.</p>

@@ -1,20 +1,12 @@
 class User < ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable,
-         :confirmable, :lockable, :trackable, :omniauthable
+  devise :database_authenticatable, :registerable, :recoverable, :validatable,
+         :confirmable, :lockable
 
-  def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
-    user.email = auth.info.email
-    user.password = Devise.friendly_token[0, 20]
-    user.name = auth.info.name   # assuming the user model has a name
-    #user.image = auth.info.image # assuming the user model has an image
-    # If you are using confirmable and the provider(s) you use validate emails, 
-    # uncomment the line below to skip the confirmation emails.
-    user.skip_confirmation!
+  has_many :boats, foreign_key: :owner_id, inverse_of: :owner, dependent: :restrict_with_error
+  validates :name, presence: true, length: { maximum: 100 }
+  validates :password_confirmation, presence: true, if: -> { password.present? }
 
-    end
+  def public_profile
+    { id: id, name: name, email: email }
   end
 end
