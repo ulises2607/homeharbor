@@ -28,7 +28,7 @@ module Api
 
       def update
         boat = current_account.boats.find(params[:id])
-        boat.update!(boat_params)
+        boat.with_lock { boat.update!(boat_params) }
         render json: { data: boat.public_details }
       end
 
@@ -44,7 +44,7 @@ module Api
 
       def set_publication(active)
         boat = current_account.boats.find(params[:id])
-        boat.update!(active: active)
+        boat.with_lock { boat.update!(active: active) }
         render json: { data: boat.public_details }
       end
 
@@ -59,12 +59,6 @@ module Api
                        meta: { page: page, per_page: per_page, total: scope.count } }
       end
 
-      def positive_integer_param(key, default)
-        return default unless params.key?(key)
-        value = Integer(params[key].to_s, 10, exception: false)
-        raise ActionController::ParameterMissing, key unless value && value.between?(1, 1_000_000)
-        value
-      end
     end
   end
 end
