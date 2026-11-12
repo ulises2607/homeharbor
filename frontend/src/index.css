@@ -44,6 +44,12 @@ nav a.active { color: #0c6458; box-shadow: 0 2px #0c6458; }
 .boat-editor { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 2rem; align-items: start; }
 .photo-manager { padding: 2rem 0; }
 .photo-manager form { display: flex; flex-direction: column; gap: 0.75rem; }
+.reservation-panel { margin-top: 2rem; padding: 1.5rem; border: 1px solid #dce8e4; border-radius: 1rem; background: white; }
+.reservation-fields { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
+.reservation-fields > div { flex: 1 1 190px; }
+.reservation-fields label { display: block; margin-bottom: 0.5rem; }
+.reservation-actions { margin-top: 1.5rem; }
+.reservation-actions button { margin: 0.5rem 0.75rem 0 0; }
 footer { padding: 2rem; text-align: center; color: #5a716e; font-size: 0.85rem; }
 
 @media (width <= 600px) {

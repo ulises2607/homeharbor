@@ -2,18 +2,19 @@
 
 Fecha: 10 de noviembre de 2026.
 
-Estado: trabajo iniciado el 11 de noviembre de 2026. Cuentas y permisos integrados en `dev` por PR #1. Catálogo con fotos, filtros y datos demo implementado y verificado localmente. Reservas y disponibilidad siguen pendientes. No se asignan fechas hasta acordar disponibilidad.
+Estado: trabajo iniciado el 11 de noviembre de 2026. Cuentas y permisos integrados en `dev` por PR #1; catálogo con fotos, filtros y datos demo por PR #2. Reservas, disponibilidad, consulta y cancelación implementadas y verificadas. Quedan correo de reservas, revisión móvil/accesibilidad completa y preparación del despliegue. No se asignan fechas hasta acordar disponibilidad.
 
 ## Avance al 11 de noviembre de 2026
 
 - Confirmado por Ulises: bote completo por días y React + API Rails.
 - Preparado: [alcance y arquitectura de E0](docs/E0_ALCANCE_Y_ARQUITECTURA.md), con reglas propuestas y ejemplos verificables.
-- [Contrato de API](docs/API_V1.md): cuentas y publicaciones básicas implementadas; reservas pendientes.
+- [Contrato de API](docs/API_V1.md): cuentas, publicaciones, disponibilidad, reservas y cancelaciones implementadas.
 - Actualizado: Ruby 4.0.9, Rails 8.1.4.1, PostgreSQL 18.6 local y frontend React 19/Vite 8/Tailwind 4. Ver [informe y límites de verificación](docs/ACTUALIZACION_2026-11-11.md).
 - Confirmado e implementado: monorepo Homeharbor con `backend/` y `frontend/`. Registro, login, confirmación, recuperación y permisos de publicaciones conectados. Ver [E2 y verificaciones](docs/E2_UNIFICACION_Y_CUENTAS.md).
-- Confirmado por Ulises: USD, UTC−3 fijo y cancelación hasta 24 horas antes del inicio, inclusive. Pendiente: capitán, puerto de demostración y confirmación automática sin pagos.
+- Confirmado por Ulises: USD, UTC−3 fijo y cancelación hasta 24 horas antes del inicio, inclusive. Se aplicó la propuesta inicial de confirmación automática sin pagos ni contratación separada de capitán; pendiente ratificar esas decisiones de alcance.
 - USD y UTC−3 ya validados en Rails y PostgreSQL. Fotos y filtros documentados en [E3](docs/E3_CATALOGO.md). Puertos ficticios de demostración: Tigre y San Fernando.
-- GitHub: PR #1 integrado; `dev` y `main` protegidas con PR, CI y GitGuardian obligatorios, también para administradores. Sin force-push ni borrado de ramas protegidas.
+- [E4/E5](docs/E4_RESERVAS.md): 45 pruebas Rails, 343 comprobaciones y 23 pruebas React; recorrido de cotización → reserva → consulta → cancelación → disponibilidad recuperada verificado en navegador local.
+- GitHub: PR #1 y #2 integrados; `dev` y `main` protegidas con PR, CI y GitGuardian obligatorios, también para administradores. Sin force-push ni borrado de ramas protegidas.
 
 ## Objetivo
 
@@ -32,7 +33,7 @@ Problemas comprobados en el código original: ingreso solo por nombre, endpoints
 
 ## Acuerdos propuestos para limitar el MVP
 
-Estos supuestos deben resolverse en el entregable 0 antes de implementar las reglas de negocio.
+La tabla de E0 distingue acuerdos explícitos de propuestas. Para avanzar con la demostración se aplicó la propuesta de confirmación automática sin pagos ni contratación separada de capitán; esto no autoriza una operación comercial.
 
 - Conservar React para la interfaz y PostgreSQL para los datos; adaptar Homeharbor como backend para el frontend. No dar por compatible su autenticación actual con React sin verificarla.
 - Reservar el bote completo por días. Usar intervalos con inicio incluido y fin excluido; por ejemplo, del 10 al 12 representa dos días. Definir zona horaria del puerto y cómo se muestra esta regla al cliente.
@@ -95,7 +96,7 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 - [x] Integrar registro, confirmación de correo, ingreso, cierre de sesión y recuperación de contraseña.
 - [ ] Configurar envío de correos y URLs por ambiente.
 - [x] Asignar identidad desde la sesión y excluir IDs de propietario enviados por el cliente en publicaciones.
-- [x] Proteger operaciones de publicaciones en Rails y verificar propiedad; reservas heredarán el criterio al implementarse.
+- [x] Proteger publicaciones y reservas en Rails y verificar propiedad con solicitudes directas a la API.
 - [x] Definir respuestas JSON consistentes para sesión ausente, recursos ajenos y datos inválidos.
 - [x] Reflejar sesión expirada y errores de red; conservar formularios y evitar éxitos falsos.
 - [x] Posponer Google y retirar sus rutas públicas hasta resolver vinculación segura.
@@ -110,11 +111,11 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 - [x] Implementar campos y validaciones básicos de publicaciones. USD y UTC−3 fijo confirmados.
 - [x] Implementar imágenes con límites de tipo y tamaño, almacenamiento y manejo de fallos. Active Storage local, cinco fotos de hasta 5 MiB, control de propietario y visibilidad.
 - [x] Crear «Mis botes», edición, activación y desactivación con permisos en el servidor.
-- [x] Desactivar publicaciones; no exponer borrado físico por API. Reservas pendientes.
+- [x] Desactivar publicaciones; no exponer borrado físico por API. Reservas e historial se conservan y no se aceptan nuevas reservas.
 - [x] Adaptar catálogo y detalle con fotos, ubicación, capacidad y tarifa visible.
 - [x] Incorporar filtros básicos y paginación desde la API. Puerto y capacidad mínima; filtros persistentes en URL.
 - [x] Implementar estados de carga, vacío, error y recurso inexistente.
-- [ ] Llevar el bote elegido del detalle al formulario de reserva. Se completa junto con E4; el detalle indica que las reservas están pendientes.
+- [x] Llevar el bote elegido del detalle al formulario de reserva, conservando fechas y pasajeros al ingresar.
 
 **Criterios de aceptación:** un propietario publica un bote válido, aparece en el catálogo y puede editarlo. Otro usuario no puede modificarlo. Una publicación desactivada no acepta nuevas reservas.
 
@@ -122,15 +123,15 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 
 **Entrega:** reserva consistente y protegida contra ocupación duplicada.
 
-- [ ] Crear `Reservation` con `user_id`, `boat_id`, inicio, fin, pasajeros, estado, moneda y precio acordado.
-- [ ] Utilizar tipos de fecha apropiados y claves foráneas, no nombres ni fechas guardadas como texto.
-- [ ] Validar intervalo, fechas pasadas, capacidad y estado del bote en el servidor.
-- [ ] Consultar disponibilidad y mostrar fechas ocupadas.
-- [ ] Calcular duración y total en el servidor; guardar la tarifa y el total de la operación.
-- [ ] Impedir solapamientos mediante una garantía de base de datos o mecanismo transaccional probado, además de validaciones de aplicación.
-- [ ] Manejar solicitudes repetidas para evitar duplicar una reserva por reintento o doble clic.
-- [ ] Mostrar confirmación solo tras una respuesta exitosa; conservar los datos cuando haya errores.
-- [ ] Notificar conflictos de disponibilidad con un mensaje útil.
+- [x] Crear `Reservation` con `user_id`, `boat_id`, inicio, fin, pasajeros, estado, moneda y precio acordado.
+- [x] Utilizar tipos de fecha apropiados y claves foráneas, no nombres ni fechas guardadas como texto.
+- [x] Validar intervalo, fechas pasadas, capacidad y estado del bote en el servidor.
+- [x] Consultar disponibilidad y mostrar fechas ocupadas sin datos de otros clientes.
+- [x] Calcular duración y total en el servidor; guardar la tarifa y el total de la operación.
+- [x] Impedir solapamientos con exclusión GiST en PostgreSQL y bloqueos transaccionales; concurrencia probada con conexiones independientes.
+- [x] Manejar solicitudes repetidas con UUID por cuenta y operación, incluso tras recargar o perder la respuesta.
+- [x] Mostrar confirmación solo tras una respuesta exitosa; conservar los datos cuando haya errores.
+- [x] Notificar conflictos de disponibilidad con un mensaje útil.
 
 **Criterios de aceptación:** una reserva válida bloquea su intervalo; otra superpuesta se rechaza; una contigua se acepta según E0. Dos solicitudes concurrentes por el mismo intervalo producen una sola reserva confirmada. Alterar el precio desde el cliente no cambia el total calculado por Rails.
 
@@ -138,14 +139,14 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 
 **Entrega:** cliente y propietario pueden seguir sus operaciones sin perder el historial.
 
-- [ ] Consultar «Mis reservas» filtrando por usuario en el servidor.
-- [ ] Mostrar detalle del bote, fechas, pasajeros, importe y estado sin depender del orden de carga de otras consultas.
-- [ ] Implementar cancelación autorizada hasta 24 horas antes del inicio, inclusive, y liberación de disponibilidad.
-- [ ] Mostrar al propietario las reservas de sus propios botes con solo los datos necesarios.
+- [x] Consultar «Mis reservas» filtrando por usuario en el servidor.
+- [x] Mostrar detalle del bote, fechas, pasajeros, importe y estado sin depender del orden de carga de otras consultas.
+- [x] Implementar cancelación autorizada hasta 24 horas antes del inicio, inclusive, y liberación de disponibilidad.
+- [x] Mostrar al propietario las reservas de sus propios botes con solo los datos necesarios.
 - [ ] Enviar confirmaciones y cancelaciones; un fallo de correo no debe duplicar ni deshacer la reserva.
 - [ ] Revisar formularios, etiquetas, navegación con teclado y presentación móvil.
-- [ ] Unificar mensajes y manejo de errores de la API.
-- [ ] Esperar las operaciones antes de navegar o refrescar listas; eliminar confirmaciones falsas del frontend original.
+- [x] Unificar mensajes y manejo de errores de la API en el flujo de reservas.
+- [x] Esperar las operaciones antes de navegar o refrescar listas; eliminar confirmaciones falsas del frontend original.
 
 **Criterios de aceptación:** un cliente reserva, consulta y cancela; el propietario ve el estado actualizado y las fechas vuelven a estar disponibles. El historial se conserva aunque el bote se desactive. Un tercero no puede consultar ni cancelar la reserva.
 
@@ -184,4 +185,4 @@ Cada entregable se divide en cambios pequeños y revisables. Las pruebas se agre
 
 Un entregable termina cuando cumple sus criterios, se demuestra su recorrido, pasan las pruebas pertinentes y la documentación refleja la implementación. Las propuestas de este archivo no equivalen a implementación ni autorizan contratar servicios o publicar cambios por sí solas.
 
-**Próximo paso:** E4, disponibilidad y reservas por días: intervalos, cálculo en USD, bloqueo de solapamientos e idempotencia. E5 implementará cancelación con corte inclusivo de 24 horas, consulta e historial. SMTP real y almacenamiento de producción siguen pendientes de E6. Capitán y confirmación automática sin pagos siguen siendo propuestas por cerrar antes de implementar ese flujo.
+**Próximo paso:** terminar E5 con avisos de confirmación/cancelación que toleren fallos de correo y revisión móvil/accesibilidad. Después, E6: elegir hosting y costes, verificar SMTP real, persistencia de fotos, copias/restauración, HTTPS y recorrido desplegado. Ratificar el alcance de confirmación automática sin pagos ni gestión separada de capitán antes de uso comercial.

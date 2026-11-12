@@ -27,6 +27,7 @@ export default function MyBoats() {
     <div className="boat-grid">{data?.map(boat => <article className="boat-card" key={boat.id}><h2>{boat.name}</h2>
       <p>{boat.active ? 'Publicado' : 'Inactivo'} · {boat.port}</p>
       <Link to={'/my-boats/' + boat.id + '/edit'}>Editar</Link>
+      {' · '}<Link to={'/my-boats/' + boat.id + '/reservations'}>Reservas</Link>
       <button disabled={busy !== null} onClick={() => toggle(boat)}>{busy === boat.id ? 'Guardando…' : boat.active ? 'Desactivar' : 'Activar'}</button>
     </article>)}</div>
     {meta && meta.total > meta.per_page && <nav aria-label="Paginación">

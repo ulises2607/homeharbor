@@ -10,6 +10,8 @@ import AccountRecovery from './components/pages/AccountRecovery';
 import AddBoat from './components/pages/AddBoat';
 import MyBoats from './components/pages/MyBoats';
 import EditBoat from './components/pages/EditBoat';
+import MyReservations from './components/pages/MyReservations';
+import ReservationDetails from './components/pages/ReservationDetails';
 
 export default function App() {
   return <BrowserRouter><SessionBoundary><Routes><Route path="/" element={<Layout />}>
@@ -24,8 +26,10 @@ export default function App() {
       <Route path="add-boat" element={<AddBoat />} /><Route path="my-boats" element={<MyBoats />} />
       <Route path="my-boats/:id/edit" element={<EditBoat />} />
       <Route path="delete-boat" element={<Navigate to="/my-boats" replace />} />
-      <Route path="reserve" element={<p>Las reservas estarán disponibles próximamente.</p>} />
-      <Route path="my-reservations" element={<p>Las reservas estarán disponibles próximamente.</p>} />
+      <Route path="reserve" element={<Navigate to="/boats" replace />} />
+      <Route path="my-reservations" element={<MyReservations />} />
+      <Route path="my-reservations/:id" element={<ReservationDetails />} />
+      <Route path="my-boats/:boatId/reservations" element={<MyReservations ownerView />} />
     </Route>
     <Route path="*" element={<section><h1>Página no encontrada</h1><Link to="/boats">Volver al catálogo</Link></section>} />
   </Route></Routes></SessionBoundary></BrowserRouter>;

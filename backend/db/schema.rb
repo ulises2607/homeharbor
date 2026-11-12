@@ -10,8 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_012213) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_020000) do
   # These are extensions that must be enabled in order to support this database
+  enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -62,6 +63,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_012213) do
     t.check_constraint "time_zone::text = 'Etc/GMT+3'::text", name: "boats_fixed_time_zone"
   end
 
+  create_table "reservations", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "boat_id", null: false
+    t.date "starts_on", null: false
+    t.date "ends_on", null: false
+    t.integer "passengers", null: false
+    t.string "status", default: "confirmed", null: false
+    t.bigint "daily_rate_cents", null: false
+    t.bigint "total_cents", null: false
+    t.string "currency", null: false
+    t.string "time_zone", null: false
+    t.string "idempotency_key", limit: 36, null: false
+    t.string "request_fingerprint", limit: 64, null: false
+    t.datetime "cancelled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["boat_id"], name: "index_reservations_on_boat_id"
+    t.index ["user_id", "idempotency_key"], name: "index_reservations_on_user_and_key", unique: true
+    t.index ["user_id"], name: "index_reservations_on_user_id"
+    t.check_constraint "currency::text = 'USD'::text AND time_zone::text = 'Etc/GMT+3'::text", name: "reservations_currency_and_zone"
+    t.check_constraint "daily_rate_cents > 0 AND total_cents = ((ends_on - starts_on)::bigint * daily_rate_cents)", name: "reservations_valid_price"
+    t.check_constraint "isfinite(starts_on) AND isfinite(ends_on) AND ends_on > starts_on", name: "reservations_valid_interval"
+    t.check_constraint "passengers >= 1 AND passengers <= 500", name: "reservations_positive_passengers"
+    t.check_constraint "status::text = 'confirmed'::text AND cancelled_at IS NULL OR status::text = 'cancelled'::text AND cancelled_at IS NOT NULL", name: "reservations_valid_status"
+    t.exclusion_constraint "boat_id WITH =, daterange(starts_on, ends_on, '[)'::text) WITH &&", where: "(status)::text = 'confirmed'::text", using: :gist, name: "reservations_no_overlap"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -97,4 +125,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_012213) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boats", "users", column: "owner_id"
+  add_foreign_key "reservations", "boats"
+  add_foreign_key "reservations", "users"
 end

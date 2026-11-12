@@ -32,9 +32,10 @@ export async function ensureCsrf() {
   }
   return csrfRequest;
 }
-export async function apiRequest(path, { method = 'GET', body, signal, notifyUnauthorized = true } = {}) {
+export async function apiRequest(path, { method = 'GET', body, signal, notifyUnauthorized = true, idempotencyKey } = {}) {
   const headers = { Accept: 'application/json' };
   const multipart = body instanceof FormData;
+  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
   if (method !== 'GET') {
     headers['X-CSRF-Token'] = await ensureCsrf();
     if (!multipart) headers['Content-Type'] = 'application/json';

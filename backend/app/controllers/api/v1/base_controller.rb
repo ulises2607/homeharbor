@@ -23,8 +23,21 @@ module Api
       rescue_from ActiveRecord::RecordNotUnique do
         api_error(:conflict, "Los datos ya existen. Revisalos e intentá nuevamente.", :conflict)
       end
+      rescue_from ActiveModel::ValidationError do |exception|
+        validation_error(exception.model)
+      end
+      rescue_from ReservationError do |exception|
+        api_error(exception.code, exception.message, exception.status)
+      end
 
       private
+
+      def positive_integer_param(key, default)
+        return default unless params.key?(key)
+        value = Integer(params[key].to_s, 10, exception: false)
+        raise ActionController::ParameterMissing, key unless value && value.between?(1, 1_000_000)
+        value
+      end
 
       def private_response
         response.headers["Cache-Control"] = "no-store"

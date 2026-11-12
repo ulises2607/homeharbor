@@ -18,11 +18,15 @@ Registro con nombre, correo y contraseña; confirmación de correo; ingreso y sa
 
 Catálogo público con filtros por puerto y capacidad, paginación y fotos. Publicaciones propias: crear, consultar, editar, subir/eliminar fotos, desactivar y reactivar. Rails asigna al propietario desde la sesión y limita cada modificación a sus propios botes. Una cuenta puede publicar y consultar; no se implementaron administradores. Tarifas en USD y zona fija UTC−3, validadas también en PostgreSQL.
 
-**Pendiente:** reservas por intervalos, disponibilidad, cancelaciones y despliegue. La política confirmada permite cancelar hasta 24 horas antes del inicio, inclusive; se implementará con las reservas. Las pantallas históricas que afirmaban reservar sin una API compatible se reemplazaron por un aviso de disponibilidad futura.
+Reservas de botes completos por días: disponibilidad pública, cotización en USD calculada por Rails, confirmación, «Mis reservas», historial para el propietario y cancelación hasta 24 horas antes del inicio, inclusive. Del 10 al 12 se ocupan los días 10 y 11; el inicio es a las 00:00 UTC−3. PostgreSQL impide solapamientos y los reintentos recuperan la misma operación. El precio acordado y el historial se conservan aunque cambie o se desactive la publicación.
+
+Se implementó la propuesta inicial del MVP: confirmación automática sin cobros ni gestión separada de capitán. **Pendiente:** cerrar esas decisiones de alcance, avisos por correo de reservas, entrega SMTP real, revisión móvil/accesibilidad completa y despliegue.
 
 ## Arranque estándar
 
 Requisitos: Ruby 4.0.9 con Devkit en Windows, Bundler 4.0.20, Node 26.13.1 y PostgreSQL 18.6.
+
+PostgreSQL debe ofrecer la extensión `btree_gist`; la migración de reservas la habilita para excluir intervalos superpuestos. La cuenta que ejecuta migraciones necesita permiso para instalarla. En un servicio administrado se debe comprobar su disponibilidad antes del despliegue.
 
 1. Desde la raíz, definir `POSTGRES_PASSWORD` y ejecutar `docker compose up -d db`, o usar PostgreSQL instalado.
 2. Configurar `DATABASE_URL` en la terminal del backend. Compose expone desarrollo en `127.0.0.1:5433/homeharbor_development`, usuario `homeharbor`. Codificar la contraseña para URL.
@@ -101,6 +105,8 @@ npm audit
 
 El helper portable acepta `-Environment test`. Las pruebas Rails habilitan CSRF real y comprueban dos cuentas, propiedad, expiración, bloqueo, confirmación y recuperación. Las de React comprueban solicitudes, errores, sesiones vencidas y ausencia de éxitos falsos.
 
+La entrega de reservas pasó 45 pruebas Rails (343 comprobaciones), 23 pruebas React, carga de clases, lint y build. Incluye conexiones PostgreSQL concurrentes, límite exacto de cancelación y recuperación de una respuesta perdida sin duplicar reservas. Ver [evidencia y límites de E4/E5](docs/E4_RESERVAS.md).
+
 El Dockerfile del backend se construye con `docker build -t homeharbor-api ./backend`; el motor local está detenido y esta imagen no se ha construido. El despliegue deberá servir el frontend y reenviar `/api` al backend bajo el mismo origen.
 
 ## Documentación y origen
@@ -112,6 +118,7 @@ El Dockerfile del backend se construye con `docker build -t homeharbor-api ./bac
 - [Contrato de API y estado de implementación](docs/API_V1.md).
 - [Unificación y cuentas](docs/E2_UNIFICACION_Y_CUENTAS.md).
 - [Catálogo, fotos y verificación](docs/E3_CATALOGO.md).
+- [Reservas, disponibilidad y cancelaciones](docs/E4_RESERVAS.md).
 - [Actualización de dependencias](docs/ACTUALIZACION_2026-11-11.md).
 - [Comparación histórica con v2](docs/COMPARACION_BOATS_V2.md).
 

@@ -1,8 +1,8 @@
 # Contrato inicial de API — Homeharbor
 
-Fecha: 11 de noviembre de 2026. Estado: cuentas, publicaciones, fotos y filtros implementados; disponibilidad y reservas siguen siendo diseño pendiente.
+Fecha: 11 de noviembre de 2026. Estado: cuentas, publicaciones, fotos, filtros, disponibilidad, reservas e historial/cancelaciones implementados.
 
-Base: `/api/v1`. JSON en `snake_case`. Autenticación por sesión y CSRF según [E0](E0_ALCANCE_Y_ARQUITECTURA.md). El frontend en `homeharbor/frontend` ya consume cuentas y publicaciones. Evidencia y límites en [E2](E2_UNIFICACION_Y_CUENTAS.md).
+Base: `/api/v1`. JSON en `snake_case`. Autenticación por sesión y CSRF según [E0](E0_ALCANCE_Y_ARQUITECTURA.md). React consume estas rutas. Evidencia y límites en [E2](E2_UNIFICACION_Y_CUENTAS.md), [E3](E3_CATALOGO.md) y [E4/E5](E4_RESERVAS.md).
 
 ## Convenciones
 
@@ -34,7 +34,7 @@ Los enlaces de correo abren una pantalla frontend que envía el token a Rails. L
 
 ## Publicaciones — base de E3
 
-Implementadas las rutas siguientes; las restricciones dependientes de futuras reservas siguen pendientes. Listados paginados con `page` y `per_page`. USD y UTC−3 fijo (`Etc/GMT+3`) se validan en Rails y PostgreSQL.
+Implementadas las rutas siguientes. Listados paginados con `page` y `per_page`. USD y UTC−3 fijo (`Etc/GMT+3`) se validan en Rails y PostgreSQL. Editar/desactivar utiliza el mismo bloqueo de bote que reservar. Reducir capacidad por debajo de pasajeros de reservas confirmadas aún no terminadas devuelve `422`; cambiar tarifa no altera sus importes y desactivar conserva su historial.
 
 | Método | Ruta | Comportamiento | Acceso |
 |---|---|---|---|
@@ -65,11 +65,11 @@ Hasta 5 fotos por bote y 5 MiB (5.242.880 bytes) por archivo; JPEG, PNG o WebP, 
 
 ## Disponibilidad y reservas — E4/E5
 
-Pendiente de implementación: estas rutas todavía no existen.
+Implementado con confirmación automática sin pagos. Inicio incluido y fin excluido; primer día posterior al día actual en UTC−3. Solo `confirmed` ocupa fechas. El cliente no puede reservar su propio bote (`403 own_boat`) ni uno inactivo (`404`). Fechas, capacidad o cantidades inválidas devuelven `422 validation_failed`.
 
 | Método | Ruta | Comportamiento | Acceso |
 |---|---|---|---|
-| GET | `/boats/:id/availability?starts_on=...&ends_on=...&passengers=...` | Disponibilidad, duración, tarifa y total actual; no bloquea fechas ni muestra quién reservó | Público |
+| GET | `/boats/:boat_id/availability?starts_on=...&ends_on=...&passengers=...` | Disponibilidad, duración, tarifa y total actual; no bloquea fechas ni muestra quién reservó | Público |
 | POST | `/reservations` | Validar cotización y crear una reserva confirmada; `201` | Sesión + CSRF + `Idempotency-Key` |
 | GET | `/me/reservations` | Solo reservas propias, paginadas | Sesión |
 | GET | `/me/reservations/:id` | Detalle propio, con resumen del bote incluido | Cliente dueño de la reserva |
@@ -78,7 +78,9 @@ Pendiente de implementación: estas rutas todavía no existen.
 
 Regla confirmada: inicio a las 00:00 UTC−3 del primer día; cancelación permitida cuando `ahora <= inicio - 24 horas`. Una reserva del día 10 admite cancelación hasta el día 9 a las 00:00 UTC−3, inclusive.
 
-Consulta de disponibilidad: responde `200` con `available: true/false`, `days`, `daily_rate_cents`, `total_cents`, `currency` y `time_zone`; valida también intervalo, capacidad y publicación. Una respuesta disponible no garantiza el resultado posterior de la reserva.
+Consulta de disponibilidad: responde `200` con `data: {available, days, daily_rate_cents, total_cents, currency, time_zone, occupied_intervals, more_occupied_intervals}`. `occupied_intervals` contiene hasta 50 intervalos confirmados que se superponen con la consulta, ordenados por inicio, cada uno con `starts_on` y `ends_on`; no incluye datos personales ni IDs. La bandera indica si hay más. Valida también intervalo, capacidad y publicación. Una respuesta disponible no garantiza el resultado posterior de la reserva.
+
+Los listados privados se ordenan por creación descendente y luego ID descendente; aceptan `page`/`per_page`. El propietario recibe `customer: {name}` en reservas de sus botes, sin correo ni credenciales; no recibe permiso para cancelarlas. El cliente solo consulta/cancela sus propias operaciones; un ID ajeno devuelve `404`. No hay endpoints de cambio de fechas ni borrado.
 
 ### Ejemplo de creación
 
@@ -108,7 +110,7 @@ Los valores `expected_*` son una comprobación del importe visto por el cliente,
 {
   "data": {
     "id": 101,
-    "boat": { "id": 42, "name": "Bote de demostración" },
+    "boat": { "id": 42, "name": "Bote de demostración", "port": "Tigre", "active": true },
     "starts_on": "2026-12-10",
     "ends_on": "2026-12-12",
     "passengers": 4,
@@ -118,18 +120,22 @@ Los valores `expected_*` son una comprobación del importe visto por el cliente,
     "total_cents": 20000,
     "currency": "USD",
     "time_zone": "Etc/GMT+3",
-    "cancelled_at": null
+    "cancelled_at": null,
+    "cancellation_deadline": "2026-12-09T03:00:00Z",
+    "can_cancel": true
   }
 }
 ```
 
-Reintentar una creación exitosa con igual clave y contenido devuelve `200` y la misma operación en su estado actual, incluso si luego fue cancelada; no reactiva ni crea otra. La idempotencia se comprueba antes de rechazar por ocupación causada por esa misma reserva.
+`Idempotency-Key` debe tener formato UUID; ausente o inválida devuelve `400 invalid_idempotency_key`. Se normaliza a minúsculas y es única por cuenta, incluso entre botes distintos. Reintentar una creación exitosa con igual clave y contenido devuelve `200` y la misma operación en su estado actual, incluso si luego fue cancelada, cambiaron tarifa/publicación o pasó su fecha; no reactiva ni crea otra. Una clave con otros datos devuelve `409 idempotency_conflict`. La idempotencia se comprueba antes de volver a aplicar disponibilidad y reglas temporales.
 
-Conflictos documentados: `availability_conflict`, `price_changed`, `idempotency_conflict`, `cancellation_closed`. La API debe diferenciar estos errores de una validación de formulario.
+La cancelación responde con el mismo detalle en estado `cancelled`, `cancelled_at` y `can_cancel: false`. Se conservan importes y fechas; repetirla no modifica su marca temporal, incluso después del límite.
+
+Conflictos `409`: `availability_conflict`, `price_changed`, `idempotency_conflict`, `cancellation_closed`. Se diferencian de una validación de formulario. La API nunca toma `user_id`, `status`, `daily_rate_cents` ni `total_cents` enviados como fuente de identidad, estado o precio.
 
 ## Pruebas de contrato
 
-Sesión, CSRF y permisos de publicaciones ya cuentan con pruebas de integración usando dos cuentas. Las comprobaciones de reservas, idempotencia y concurrencia de los puntos siguientes corresponden a entregables futuros.
+Sesión, CSRF, permisos, disponibilidad, precio, idempotencia, cancelación y concurrencia cuentan con pruebas reales contra PostgreSQL. Se comprueban restricciones con SQL directo y carreras con conexiones independientes; ver [E4/E5](E4_RESERVAS.md).
 
 - Comparar respuestas reales con este documento al implementar cada entregable.
 - Comprobar errores JSON, sesión vencida y token CSRF ausente o incorrecto.

@@ -9,13 +9,20 @@ Rails.application.routes.draw do
       resources :registrations, only: :create
       resource :confirmations, only: %i[create update]
       resource :passwords, only: %i[create update]
+      resources :reservations, only: :create
       resources :boats, only: %i[index show create update] do
+        resource :availability, only: :show, controller: "availability"
         resources :photos, only: %i[show create destroy], controller: "boat_photos"
         post :deactivation, on: :member
         post :activation, on: :member
       end
       namespace :me do
-        resources :boats, only: %i[index show]
+        resources :boats, only: %i[index show] do
+          resources :reservations, only: :index, controller: "boat_reservations"
+        end
+        resources :reservations, only: %i[index show] do
+          post :cancellation, on: :member
+        end
       end
     end
   end
