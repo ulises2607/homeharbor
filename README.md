@@ -16,9 +16,9 @@ El backend original de Homeharbor se trasladó conservando su historial Git y su
 
 Registro con nombre, correo y contraseña; confirmación de correo; ingreso y salida; restauración de sesión; reenvío de confirmación y recuperación de contraseña. Las sesiones utilizan cookies cifradas, HttpOnly, SameSite=Lax, Secure en producción y CSRF en operaciones de escritura. Vencen tras 30 minutos de inactividad o 12 horas desde el ingreso.
 
-Catálogo público y base de publicaciones propias: crear, consultar, editar, desactivar y reactivar. Rails asigna al propietario desde la sesión y limita cada modificación a sus propios botes. Una cuenta puede publicar y consultar; no se implementaron administradores.
+Catálogo público con filtros por puerto y capacidad, paginación y fotos. Publicaciones propias: crear, consultar, editar, subir/eliminar fotos, desactivar y reactivar. Rails asigna al propietario desde la sesión y limita cada modificación a sus propios botes. Una cuenta puede publicar y consultar; no se implementaron administradores. Tarifas en USD y zona fija UTC−3, validadas también en PostgreSQL.
 
-**Pendiente:** imágenes, filtros, reservas por intervalos, disponibilidad, cancelaciones y despliegue. Las pantallas históricas que afirmaban reservar sin una API compatible se reemplazaron por un aviso de disponibilidad futura.
+**Pendiente:** reservas por intervalos, disponibilidad, cancelaciones y despliegue. La política confirmada permite cancelar hasta 24 horas antes del inicio, inclusive; se implementará con las reservas. Las pantallas históricas que afirmaban reservar sin una API compatible se reemplazaron por un aviso de disponibilidad futura.
 
 ## Arranque estándar
 
@@ -53,6 +53,14 @@ Abrir `http://127.0.0.1:5173`. Vite reenvía `/api` a Rails en el puerto 3001; e
 En desarrollo los mensajes se guardan en `backend/tmp/mails/`, sin enviarlos por Internet. Después de registrar una cuenta, ejecutar desde `backend/` el comando `ruby bin/mail-preview.rb correo@ejemplo.com`. Abrir el archivo HTML que indica ese comando y seguir el enlace. El helper decodifica el formato de correo, incluidos los saltos de línea de Windows. La página requiere presionar «Confirmar correo». El enlace vence en 3 días; la recuperación de contraseña, en 6 horas.
 
 En producción deben configurarse `FRONTEND_URL`, `MAILER_FROM`, `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` y `SMTP_PASSWORD`. El proveedor y su entrega real no se han verificado. Los límites por IP son por proceso; antes de escalar a varios procesos se requiere un límite compartido o en el proxy. El bloqueo por cinco contraseñas incorrectas se guarda en PostgreSQL.
+
+### Datos de demostración y fotos
+
+Con `RAILS_ENV=development`, definir `DEMO_PASSWORD` con una contraseña local de 12 a 128 caracteres y ejecutar `ruby bin/rails db:seed`. No guardar esa variable en Git. Se crean `owner@homeharbor.test`, `guest@homeharbor.test` y tres botes ficticios de Tigre/San Fernando. Las cuentas demo ya están confirmadas; las nuevas usan la contraseña elegida. Repetir el comando conserva los datos y contraseñas existentes. Sin la variable se omite la carga, y fuera de desarrollo nunca se crean cuentas demo.
+
+Las fotos se agregan desde «Mis botes → Editar» después de publicar. Se permiten cinco JPEG/PNG/WebP de hasta 5 MiB cada una. Active Storage guarda los archivos de desarrollo en `backend/storage` y los de pruebas en `backend/tmp/storage`, ambos excluidos de Git. El detalle y catálogo reciben URLs de la API; una foto de un bote desactivado solo es visible para su dueño.
+
+Se sirven originales, sin variantes ni procesamiento adicional. Para desplegar hacen falta almacenamiento persistente, copias de seguridad de archivos junto con PostgreSQL y un límite de subida en el proxy. La migración de zona horaria normaliza todos los botes a UTC−3; su reversión requiere restaurar una copia si se necesitaban las zonas anteriores.
 
 ### Herramientas portables de este espacio
 
@@ -103,6 +111,7 @@ El Dockerfile del backend se construye con `docker build -t homeharbor-api ./bac
 - [Alcance y arquitectura](docs/E0_ALCANCE_Y_ARQUITECTURA.md).
 - [Contrato de API y estado de implementación](docs/API_V1.md).
 - [Unificación y cuentas](docs/E2_UNIFICACION_Y_CUENTAS.md).
+- [Catálogo, fotos y verificación](docs/E3_CATALOGO.md).
 - [Actualización de dependencias](docs/ACTUALIZACION_2026-11-11.md).
 - [Comparación histórica con v2](docs/COMPARACION_BOATS_V2.md).
 

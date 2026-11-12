@@ -34,6 +34,16 @@ nav a.active { color: #0c6458; box-shadow: 0 2px #0c6458; }
 .boat-mark { font-size: 3rem; display: block; margin-bottom: 1rem; }
 .eyebrow { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.8rem; color: #33766b; font-weight: 700; }
 .notice { border-left: 3px solid #b29950; padding: 1rem; background: #fff9e8; }
+.catalog-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0; }
+.catalog-filters > div { flex: 1 1 180px; }
+.catalog-filters label { display: block; margin-bottom: 0.4rem; }
+.boat-cover { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem; }
+.photo-gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 1rem; margin: 1rem 0; }
+.photo-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 0.5rem; }
+.photo-gallery button { margin-top: 0.5rem; }
+.boat-editor { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr)); gap: 2rem; align-items: start; }
+.photo-manager { padding: 2rem 0; }
+.photo-manager form { display: flex; flex-direction: column; gap: 0.75rem; }
 footer { padding: 2rem; text-align: center; color: #5a716e; font-size: 0.85rem; }
 
 @media (width <= 600px) {

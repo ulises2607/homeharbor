@@ -4,11 +4,21 @@ module Api
       skip_before_action :require_account!, only: %i[index show]
 
       def index
-        render_collection(Boat.published)
+        scope = Boat.published
+        raise ActionController::ParameterMissing, :port unless params[:port].nil? || params[:port].is_a?(String)
+        port = params[:port].to_s.strip
+        raise ActionController::ParameterMissing, :port if port.length > 150
+        scope = scope.where("port ILIKE ?", "%#{Boat.sanitize_sql_like(port)}%") if port.present?
+        if params[:min_capacity].present?
+          capacity = Integer(params[:min_capacity].to_s, 10, exception: false)
+          raise ActionController::ParameterMissing, :min_capacity unless capacity && capacity.between?(1, 500)
+          scope = scope.where(capacity: capacity..)
+        end
+        render_collection(scope)
       end
 
       def show
-        render json: { data: Boat.published.find(params[:id]).public_details }
+        render json: { data: Boat.published.with_attached_photos.find(params[:id]).public_details }
       end
 
       def create
@@ -43,10 +53,17 @@ module Api
       end
 
       def render_collection(scope)
-        page = [params[:page].to_i, 1].max
-        per_page = params[:per_page].present? ? params[:per_page].to_i.clamp(1, 50) : 12
-        render json: { data: scope.order(:id).offset((page - 1) * per_page).limit(per_page).map(&:public_details),
+        page = positive_integer_param(:page, 1)
+        per_page = [positive_integer_param(:per_page, 12), 50].min
+        render json: { data: scope.with_attached_photos.order(:id).offset((page - 1) * per_page).limit(per_page).map(&:public_details),
                        meta: { page: page, per_page: per_page, total: scope.count } }
+      end
+
+      def positive_integer_param(key, default)
+        return default unless params.key?(key)
+        value = Integer(params[key].to_s, 10, exception: false)
+        raise ActionController::ParameterMissing, key unless value && value.between?(1, 1_000_000)
+        value
       end
     end
   end

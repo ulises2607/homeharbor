@@ -2,7 +2,7 @@
 
 Fecha: 10 de noviembre de 2026.
 
-Estado: trabajo iniciado el 11 de noviembre de 2026. E0 tiene una definición inicial; cuentas y permisos están conectados y verificados localmente. Reservas y disponibilidad siguen pendientes. No se asignan fechas hasta acordar disponibilidad.
+Estado: trabajo iniciado el 11 de noviembre de 2026. Cuentas y permisos integrados en `dev` por PR #1. Catálogo con fotos, filtros y datos demo implementado y verificado localmente. Reservas y disponibilidad siguen pendientes. No se asignan fechas hasta acordar disponibilidad.
 
 ## Avance al 11 de noviembre de 2026
 
@@ -12,6 +12,8 @@ Estado: trabajo iniciado el 11 de noviembre de 2026. E0 tiene una definición in
 - Actualizado: Ruby 4.0.9, Rails 8.1.4.1, PostgreSQL 18.6 local y frontend React 19/Vite 8/Tailwind 4. Ver [informe y límites de verificación](docs/ACTUALIZACION_2026-11-11.md).
 - Confirmado e implementado: monorepo Homeharbor con `backend/` y `frontend/`. Registro, login, confirmación, recuperación y permisos de publicaciones conectados. Ver [E2 y verificaciones](docs/E2_UNIFICACION_Y_CUENTAS.md).
 - Confirmado por Ulises: USD, UTC−3 fijo y cancelación hasta 24 horas antes del inicio, inclusive. Pendiente: capitán, puerto de demostración y confirmación automática sin pagos.
+- USD y UTC−3 ya validados en Rails y PostgreSQL. Fotos y filtros documentados en [E3](docs/E3_CATALOGO.md). Puertos ficticios de demostración: Tigre y San Fernando.
+- GitHub: PR #1 integrado; `dev` y `main` protegidas con PR, CI y GitGuardian obligatorios, también para administradores. Sin force-push ni borrado de ramas protegidas.
 
 ## Objetivo
 
@@ -81,8 +83,8 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 - [x] Evitar que la ausencia de credenciales de Google impida trabajar con correo y contraseña.
 - [x] Centralizar la URL de la API y eliminar direcciones locales repetidas del frontend.
 - [x] Documentar instalación, arranque, migraciones, pruebas y solución de problemas en el README.
-- [ ] Crear datos de demostración repetibles sin afectar producción.
-- [x] Activar una base de pruebas y CI que ejecute pruebas y build, además de linters. Checks locales verificados; workflows preparados, todavía no ejecutados en GitHub.
+- [x] Crear datos de demostración repetibles sin afectar producción. Opt-in con `DEMO_PASSWORD`, solo desarrollo; repetición verificada sin duplicar ni cambiar contraseñas.
+- [x] Activar una base de pruebas y CI que ejecute pruebas y build, además de linters. Checks locales y jobs de GitHub Actions verificados.
 
 **Criterios de aceptación:** siguiendo el README desde una copia limpia se abre el frontend, se comprueba la conexión a Rails y PostgreSQL, y se ejecutan los checks sin secretos versionados.
 
@@ -106,13 +108,13 @@ Estos supuestos deben resolverse en el entregable 0 antes de implementar las reg
 
 - [x] Crear `Boat` relacionado con su propietario.
 - [x] Implementar campos y validaciones básicos de publicaciones. USD y UTC−3 fijo confirmados.
-- [ ] Implementar imágenes con límites de tipo y tamaño, almacenamiento y manejo de fallos.
+- [x] Implementar imágenes con límites de tipo y tamaño, almacenamiento y manejo de fallos. Active Storage local, cinco fotos de hasta 5 MiB, control de propietario y visibilidad.
 - [x] Crear «Mis botes», edición, activación y desactivación con permisos en el servidor.
 - [x] Desactivar publicaciones; no exponer borrado físico por API. Reservas pendientes.
-- [ ] Adaptar catálogo y detalle con fotos, ubicación, capacidad y tarifa visible.
-- [ ] Incorporar filtros básicos y paginación desde la API.
-- [ ] Implementar estados de carga, vacío, error y recurso inexistente.
-- [ ] Llevar el bote elegido del detalle al formulario de reserva.
+- [x] Adaptar catálogo y detalle con fotos, ubicación, capacidad y tarifa visible.
+- [x] Incorporar filtros básicos y paginación desde la API. Puerto y capacidad mínima; filtros persistentes en URL.
+- [x] Implementar estados de carga, vacío, error y recurso inexistente.
+- [ ] Llevar el bote elegido del detalle al formulario de reserva. Se completa junto con E4; el detalle indica que las reservas están pendientes.
 
 **Criterios de aceptación:** un propietario publica un bote válido, aparece en el catálogo y puede editarlo. Otro usuario no puede modificarlo. Una publicación desactivada no acepta nuevas reservas.
 
@@ -182,4 +184,4 @@ Cada entregable se divide en cambios pequeños y revisables. Las pruebas se agre
 
 Un entregable termina cuando cumple sus criterios, se demuestra su recorrido, pasan las pruebas pertinentes y la documentación refleja la implementación. Las propuestas de este archivo no equivalen a implementación ni autorizan contratar servicios o publicar cambios por sí solas.
 
-**Próximo paso:** completar datos de demostración repetibles y la verificación de correo por ambiente, terminar imágenes y filtros de E3 y continuar con disponibilidad y reservas de E4. Revisar las reglas de producto aún propuestas antes de implementar E3/E4. No se requiere rehacer todas las pantallas para empezar.
+**Próximo paso:** E4, disponibilidad y reservas por días: intervalos, cálculo en USD, bloqueo de solapamientos e idempotencia. E5 implementará cancelación con corte inclusivo de 24 horas, consulta e historial. SMTP real y almacenamiento de producción siguen pendientes de E6. Capitán y confirmación automática sin pagos siguen siendo propuestas por cerrar antes de implementar ese flujo.

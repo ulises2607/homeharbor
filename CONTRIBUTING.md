@@ -80,7 +80,7 @@ Los hooks incluidos:
 
 Se ejecutan con Git for Windows y con Git en Linux/macOS. Los scripts se versionan con LF y permiso ejecutable. Este ajuste es local; cada clon nuevo debe activarlo. No usar `--no-verify` para saltarse fallos rutinarios: corregir su causa.
 
-Estos hooks no son reglas de protección de GitHub y no impiden por sí solos un push directo desde otro clon. Las protecciones remotas de `main` y `dev` deben exigir PR y CI aprobado; no se configuraron en esta entrega local. Al publicar, comprobar las reglas existentes y sus permisos antes de cambiarlas.
+Estos hooks complementan las protecciones remotas de `main` y `dev`, configuradas el 11 de noviembre de 2026: PR obligatorio, rama actualizada con su base, conversaciones resueltas y checks `backend`, `frontend` y `GitGuardian Security Checks` aprobados. También se aplican a administradores; no permiten force-push ni borrar las ramas protegidas. No se exige una aprobación de otro revisor mientras haya un único mantenedor activo. Se permiten merge commits para conservar los commits de cada entregable. Antes de modificar estas reglas, comprobar su estado remoto.
 
 ## Releases y hotfixes
 

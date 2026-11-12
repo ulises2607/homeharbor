@@ -10,16 +10,44 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_11_000100) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_012213) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
 
   create_table "boats", force: :cascade do |t|
     t.bigint "owner_id", null: false
     t.string "name", null: false
     t.text "description", null: false
     t.string "port", null: false
-    t.string "time_zone", default: "America/Argentina/Buenos_Aires", null: false
+    t.string "time_zone", default: "Etc/GMT+3", null: false
     t.integer "capacity", null: false
     t.integer "daily_rate_cents", null: false
     t.string "currency", default: "USD", null: false
@@ -29,7 +57,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_000100) do
     t.index ["active", "id"], name: "index_boats_on_active_and_id"
     t.index ["owner_id"], name: "index_boats_on_owner_id"
     t.check_constraint "capacity > 0", name: "boats_positive_capacity"
+    t.check_constraint "currency::text = 'USD'::text", name: "boats_usd_currency"
     t.check_constraint "daily_rate_cents > 0", name: "boats_positive_rate"
+    t.check_constraint "time_zone::text = 'Etc/GMT+3'::text", name: "boats_fixed_time_zone"
   end
 
   create_table "users", force: :cascade do |t|
@@ -64,5 +94,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_11_000100) do
     t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boats", "users", column: "owner_id"
 end
