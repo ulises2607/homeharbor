@@ -42,10 +42,11 @@ Los permisos se probaron enviando solicitudes directas con dos sesiones separada
 ## Límites y próximos pasos
 
 - Esta entrega no implementa disponibilidad, reservas ni cancelaciones. Las rutas antiguas de reservas muestran que aún no están disponibles.
-- Imágenes y filtros del catálogo siguen pendientes. USD y zona horaria de Buenos Aires son valores de demostración propuestos, no decisiones comerciales definitivas.
+- Imágenes y filtros del catálogo siguen pendientes. Ulises confirmó USD, UTC−3 fijo y cancelación hasta 24 horas antes del inicio, inclusive; la regla de cancelación se implementará con las reservas.
 - Falta verificar SMTP real, remitente, dominio y HTTPS en el entorno de despliegue.
 - Los límites por IP usan memoria por proceso. Antes de escalar hay que usar un almacén compartido o límite en el proxy. El bloqueo por cuenta sí se almacena en PostgreSQL.
 - El cierre de sesión elimina la sesión del navegador actual; no se implementó administración ni revocación global de dispositivos.
-- CI está configurado en la raíz, todavía no ejecutado en GitHub. La entrega se organizó en commits locales sobre `feature/monorepo-accounts-permissions`; no hubo push, merge ni despliegue. El flujo de trabajo está documentado en [CONTRIBUTING.md](../CONTRIBUTING.md).
+- La rama se publicó en el [PR #1](https://github.com/ulises2607/homeharbor/pull/1) hacia `dev`. Los jobs `backend` y `frontend` pasaron en GitHub Actions. No hubo despliegue. El flujo de trabajo está documentado en [CONTRIBUTING.md](../CONTRIBUTING.md).
+- GitGuardian señaló la referencia de entorno de `compose.yaml:7` (incidente 39974971). Se verificó el commit original: el texto detectado era `?Set`, parte del mensaje que exige definir la variable, sin contraseña incorporada. Se clasificó como falso positivo en GitGuardian; no se modificó el historial ni se desactivó el escaneo.
 
 Referencias: [seguridad de Rails](https://guides.rubyonrails.org/security.html) y [Devise](https://github.com/heartcombo/devise). La evidencia local está en los tests del repositorio; las referencias no sustituyen esas pruebas.
