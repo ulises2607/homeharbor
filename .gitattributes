@@ -9,5 +9,6 @@ backend/config/credentials/*.yml.enc diff=rails_credentials
 backend/config/credentials.yml.enc diff=rails_credentials
 
 backend/bin/* text eol=lf
+.githooks/* text eol=lf
 *.rb text eol=lf
 *.yml text eol=lf
