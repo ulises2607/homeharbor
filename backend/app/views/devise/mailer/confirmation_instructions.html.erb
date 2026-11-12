@@ -1,0 +1,4 @@
+<p>Hola <%= @resource.name %>,</p>
+<p>Confirmá tu correo para ingresar a Homeharbor.</p>
+<p><%= link_to "Confirmar mi correo", account_link("confirm-email", "confirmation_token", @token) %></p>
+<p>Si no creaste esta cuenta, podés ignorar este mensaje.</p>

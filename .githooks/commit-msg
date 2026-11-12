@@ -1,0 +1,13 @@
+#!/bin/sh
+set -eu
+
+# A conflict-resolution commit may retain Git's generated merge message.
+if git rev-parse --quiet --verify MERGE_HEAD >/dev/null 2>&1; then
+  exit 0
+fi
+
+subject=$(head -n 1 "$1")
+if ! printf '%s\n' "$subject" | LC_ALL=C grep -Eq '^(feat|fix|docs|refactor|test|build|ci|chore|perf|style|revert)(\([a-zA-Z0-9._/-]+\))?!?: [^[:space:]].*'; then
+  echo "Mensaje rechazado. Formato: feat(scope): describe the change" >&2
+  exit 1
+fi

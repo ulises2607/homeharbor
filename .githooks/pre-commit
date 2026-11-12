@@ -1,0 +1,18 @@
+#!/bin/sh
+set -eu
+
+branch=$(git symbolic-ref --quiet --short HEAD) || {
+  echo "Commit rechazado: crea o selecciona una rama de trabajo." >&2
+  exit 1
+}
+
+case "$branch" in
+  main|dev)
+    if ! git rev-parse --quiet --verify MERGE_HEAD >/dev/null 2>&1; then
+      echo "Commit directo rechazado en $branch. Usa feature/<objetivo> y un PR." >&2
+      exit 1
+    fi
+    ;;
+esac
+
+git diff --cached --check
