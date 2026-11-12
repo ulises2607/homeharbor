@@ -1,6 +1,6 @@
 # Contrato inicial de API — Homeharbor
 
-Fecha: 11 de noviembre de 2026. Estado: cuentas y base de publicaciones implementadas; disponibilidad y reservas siguen siendo diseño pendiente.
+Fecha: 11 de noviembre de 2026. Estado: cuentas, publicaciones, fotos y filtros implementados; disponibilidad y reservas siguen siendo diseño pendiente.
 
 Base: `/api/v1`. JSON en `snake_case`. Autenticación por sesión y CSRF según [E0](E0_ALCANCE_Y_ARQUITECTURA.md). El frontend en `homeharbor/frontend` ya consume cuentas y publicaciones. Evidencia y límites en [E2](E2_UNIFICACION_Y_CUENTAS.md).
 
@@ -34,11 +34,11 @@ Los enlaces de correo abren una pantalla frontend que envía el token a Rails. L
 
 ## Publicaciones — base de E3
 
-Implementadas las rutas siguientes; filtros, imágenes y restricciones dependientes de futuras reservas siguen pendientes. Listados paginados con `page` y `per_page`. USD es la moneda acordada. UTC−3 fijo es la zona acordada; el identificador IANA es `Etc/GMT+3`.
+Implementadas las rutas siguientes; las restricciones dependientes de futuras reservas siguen pendientes. Listados paginados con `page` y `per_page`. USD y UTC−3 fijo (`Etc/GMT+3`) se validan en Rails y PostgreSQL.
 
 | Método | Ruta | Comportamiento | Acceso |
 |---|---|---|---|
-| GET | `/boats` | Botes activos y paginación; filtros `port`, `min_capacity` pendientes | Público |
+| GET | `/boats` | Botes activos, paginación y filtros `port`, `min_capacity` | Público |
 | GET | `/boats/:id` | Detalle de un bote activo | Público |
 | GET | `/me/boats` | Publicaciones propias, incluidas inactivas | Sesión |
 | GET | `/me/boats/:id` | Detalle propio editable, incluido inactivo | Propietario |
@@ -47,7 +47,21 @@ Implementadas las rutas siguientes; filtros, imágenes y restricciones dependien
 | POST | `/boats/:id/deactivation` | Desactivar sin borrar reservas; `200`, repetible | Propietario + CSRF |
 | POST | `/boats/:id/activation` | Reactivar una publicación válida; `200`, repetible | Propietario + CSRF |
 
-Campos de publicación: `boat: {name,description,port,time_zone,capacity,daily_rate_cents,currency}`. La carga y eliminación de imágenes tendrá un contrato específico de E3, con comprobación de propiedad y límites. No hay eliminación física de botes en esta API.
+Campos de publicación: `boat: {name,description,port,time_zone,capacity,daily_rate_cents,currency}`. No hay eliminación física de botes en esta API.
+
+`port` busca una subcadena literal sin distinguir mayúsculas, con un máximo de 150 caracteres. `min_capacity` es un entero entre 1 y 500. Ambos filtros se combinan antes de paginar; `meta.total` representa ese resultado. `page` y `per_page` deben ser enteros positivos; el tamaño se limita a 50. Filtros o paginación mal formados devuelven `400`.
+
+### Fotos
+
+Cada publicación devuelve `photos: [{id,url}]`, ordenadas por ID; la primera es la portada. Los IDs corresponden a adjuntos, no a blobs ni URLs firmadas.
+
+| Método | Ruta | Comportamiento | Acceso |
+|---|---|---|---|
+| POST | `/boats/:boat_id/photos` | Multipart con campo `photo`; `201` con el bote actualizado | Propietario + CSRF |
+| GET | `/boats/:boat_id/photos/:id` | Bytes de la imagen, `Cache-Control: no-store` | Público si está activo; solo propietario si está inactivo |
+| DELETE | `/boats/:boat_id/photos/:id` | Elimina el adjunto y archivo; `204` | Propietario + CSRF |
+
+Hasta 5 fotos por bote y 5 MiB (5.242.880 bytes) por archivo; JPEG, PNG o WebP, comprobando el contenido binario con Marcel. No se aceptan SVG ni un tipo declarado falso. La carga requiere archivo, no un ID de blob. El bloqueo de fila del bote serializa cargas y eliminaciones. Archivos vacíos, demasiado grandes, de otro tipo o un sexto adjunto devuelven `422 invalid_photo`; fallos del almacenamiento local devuelven `503 storage_unavailable` sin anunciar éxito. Un archivo faltante devuelve `404`. Las rutas genéricas de Active Storage están deshabilitadas para evitar eludir la visibilidad del bote.
 
 ## Disponibilidad y reservas — E4/E5
 
