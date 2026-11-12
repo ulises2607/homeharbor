@@ -11,6 +11,7 @@ export default function Header() {
     <nav aria-label="Navegación principal">
       <NavLink to="/boats">Explorar botes</NavLink>
       {user ? <>
+        <NavLink to="/my-reservations">Mis reservas</NavLink>
         <NavLink to="/my-boats">Mis botes</NavLink>
         <NavLink to="/add-boat">Publicar bote</NavLink>
         <span>Hola, {user.name}</span><Logout />

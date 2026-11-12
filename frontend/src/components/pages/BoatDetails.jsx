@@ -1,8 +1,12 @@
 import { Link, useParams } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { selectUser } from '../../redux/usersession/usersessionsSlice';
+import ReservationForm from './ReservationForm';
 import useResource from '../../lib/useResource';
 
 export default function BoatDetails() {
   const { id } = useParams();
+  const user = useSelector(selectUser);
   const { data: boat, loading, error, reload } = useResource('/boats/' + id);
   if (loading) return <p role="status">Cargando bote…</p>;
   if (error) return <div><p role="alert">{error}</p><button onClick={reload}>Reintentar</button><Link to="/boats">Volver al catálogo</Link></div>;
@@ -11,6 +15,6 @@ export default function BoatDetails() {
     <p>{boat.description}</p><dl><dt>Puerto</dt><dd>{boat.port}</dd>
       <dt>Capacidad</dt><dd>{boat.capacity} personas</dd><dt>Tarifa diaria</dt><dd>{(boat.daily_rate_cents / 100).toFixed(2)} {boat.currency}</dd>
       <dt>Zona horaria</dt><dd>UTC−3</dd></dl>
-    <p className="notice">Las reservas estarán disponibles próximamente.</p>
+    <ReservationForm boat={boat} user={user} key={boat.id + ':' + (user?.id || 'guest')} />
   </article>;
 }
