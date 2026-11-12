@@ -22,6 +22,13 @@ module Homeharbor
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 8.1
+    config.time_zone = "Etc/GMT+3"
+    # Only our boat-scoped controller serves photos, including ownership checks
+    # for unpublished boats. Default signed blob URLs must not bypass those checks.
+    config.active_storage.draw_routes = false
+    config.active_storage.variant_processor = :disabled
+    config.active_storage.analyzers = []
+    config.active_storage.previewers = []
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.

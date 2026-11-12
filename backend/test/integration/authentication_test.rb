@@ -36,7 +36,7 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
 
   def boat_attributes
     { name: "Harbor One", description: "A small sailing boat", port: "Tigre", capacity: 6,
-      daily_rate_cents: 10000, currency: "USD", time_zone: "America/Argentina/Buenos_Aires" }
+      daily_rate_cents: 10000, currency: "USD", time_zone: "Etc/GMT+3" }
   end
 
   test "registration requires CSRF and cannot inject confirmation or privileges" do

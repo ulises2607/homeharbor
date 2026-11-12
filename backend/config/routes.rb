@@ -10,6 +10,7 @@ Rails.application.routes.draw do
       resource :confirmations, only: %i[create update]
       resource :passwords, only: %i[create update]
       resources :boats, only: %i[index show create update] do
+        resources :photos, only: %i[show create destroy], controller: "boat_photos"
         post :deactivation, on: :member
         post :activation, on: :member
       end
