@@ -34,14 +34,15 @@ export async function ensureCsrf() {
 }
 export async function apiRequest(path, { method = 'GET', body, signal, notifyUnauthorized = true } = {}) {
   const headers = { Accept: 'application/json' };
+  const multipart = body instanceof FormData;
   if (method !== 'GET') {
     headers['X-CSRF-Token'] = await ensureCsrf();
-    headers['Content-Type'] = 'application/json';
+    if (!multipart) headers['Content-Type'] = 'application/json';
   }
   try {
     return await readResponse(await fetch('/api/v1' + path, {
       method, headers, credentials: 'same-origin', signal,
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      ...(body === undefined ? {} : { body: multipart ? body : JSON.stringify(body) }),
     }));
   } catch (error) {
     if (error.code === 'invalid_csrf') clearCsrfToken();
