@@ -2,7 +2,7 @@
 
 Fecha: 10 de noviembre de 2026.
 
-Estado: trabajo iniciado el 11 de noviembre de 2026. Cuentas y permisos integrados en `dev` por PR #1; catálogo con fotos, filtros y datos demo por PR #2. Reservas, disponibilidad, consulta y cancelación implementadas y verificadas. Quedan correo de reservas, revisión móvil/accesibilidad completa y preparación del despliegue. No se asignan fechas hasta acordar disponibilidad.
+Estado actualizado al 12 de noviembre de 2026: cuentas, catálogo y reservas integrados por PR #1, #2 y #3. E5 implementado y verificado localmente: avisos durables, revisión móvil/teclado y material de portfolio. E6 preparado con Docker, CI y ensayo de restauración; faltan servidor/dominio, SMTP real y recorrido público. Ver [evidencia de E5](docs/E5_DEMO_PORTFOLIO.md), [kit de demo](docs/demo/README.md) y [operación](docs/DEPLOYMENT.md).
 
 ## Avance al 11 de noviembre de 2026
 
@@ -143,8 +143,8 @@ La tabla de E0 distingue acuerdos explícitos de propuestas. Para avanzar con la
 - [x] Mostrar detalle del bote, fechas, pasajeros, importe y estado sin depender del orden de carga de otras consultas.
 - [x] Implementar cancelación autorizada hasta 24 horas antes del inicio, inclusive, y liberación de disponibilidad.
 - [x] Mostrar al propietario las reservas de sus propios botes con solo los datos necesarios.
-- [ ] Enviar confirmaciones y cancelaciones; un fallo de correo no debe duplicar ni deshacer la reserva.
-- [ ] Revisar formularios, etiquetas, navegación con teclado y presentación móvil.
+- [x] Enviar confirmaciones y cancelaciones; un fallo de correo no debe duplicar ni deshacer la reserva. Intenciones transaccionales, reintentos y entrega local comprobados; SMTP público queda en E6.
+- [x] Revisar formularios, etiquetas, navegación con teclado y presentación móvil. Verificación funcional a 390/768 px; no equivale a certificación WCAG.
 - [x] Unificar mensajes y manejo de errores de la API en el flujo de reservas.
 - [x] Esperar las operaciones antes de navegar o refrescar listas; eliminar confirmaciones falsas del frontend original.
 
@@ -154,14 +154,14 @@ La tabla de E0 distingue acuerdos explícitos de propuestas. Para avanzar con la
 
 **Entrega:** URL de demostración y procedimiento de operación documentado.
 
-- [ ] Elegir hosting compatible con la arquitectura acordada y documentar servicios y costes previstos.
+- [x] Elegir hosting compatible con la arquitectura acordada y documentar servicios y costes previstos. Propuesta VPS/Compose con presupuesto en DEPLOYMENT.md; contratación pendiente.
 - [ ] Configurar PostgreSQL, imágenes persistentes, correo, HTTPS y secretos en el entorno de despliegue.
 - [ ] Ejecutar migraciones de forma controlada y documentar reversión de despliegue.
-- [ ] Configurar registros y seguimiento de errores sin exponer credenciales o datos innecesarios.
-- [ ] Configurar copias de seguridad y comprobar una restauración en un entorno separado.
-- [ ] Ejecutar pruebas de extremo a extremo del recorrido con dos cuentas.
-- [ ] Verificar restricciones de acceso, concurrencia, errores de red y expiración de sesión.
-- [ ] Actualizar README, atribuciones, capturas e instrucciones de demostración.
+- [ ] Configurar registros y seguimiento de errores sin exponer credenciales o datos innecesarios. Logs filtrados y contadores de avisos listos; falta conectar alertas externas.
+- [ ] Configurar copias de seguridad y comprobar una restauración en un entorno separado. Helper y restauración local verificados; agenda y almacenamiento externo de producción pendientes.
+- [x] Ejecutar pruebas de extremo a extremo del recorrido con dos cuentas. Cliente y propietario en navegador local; repetir en la URL pública antes de cerrar E6.
+- [x] Verificar restricciones de acceso, concurrencia, errores de red y expiración de sesión. Tests Rails/React y recorridos locales; evidencia de cada entrega en docs.
+- [x] Actualizar README, atribuciones, capturas e instrucciones de demostración. Caso de estudio ES/EN y videos reproducibles desde capturas reales.
 
 **Criterios de aceptación:** en la URL desplegada se completa publicación → reserva → consulta → cancelación. CI pasa; no hay bloqueos conocidos en ese recorrido y se documentan las limitaciones restantes.
 
@@ -185,4 +185,4 @@ Cada entregable se divide en cambios pequeños y revisables. Las pruebas se agre
 
 Un entregable termina cuando cumple sus criterios, se demuestra su recorrido, pasan las pruebas pertinentes y la documentación refleja la implementación. Las propuestas de este archivo no equivalen a implementación ni autorizan contratar servicios o publicar cambios por sí solas.
 
-**Próximo paso:** terminar E5 con avisos de confirmación/cancelación que toleren fallos de correo y revisión móvil/accesibilidad. Después, E6: elegir hosting y costes, verificar SMTP real, persistencia de fotos, copias/restauración, HTTPS y recorrido desplegado. Ratificar el alcance de confirmación automática sin pagos ni gestión separada de capitán antes de uso comercial.
+**Próximo paso:** usar el kit de portfolio y cerrar E6 cuando haya servidor, dominio y proveedor SMTP disponibles: desplegar el commit aprobado, probar entrega real, HTTPS, persistencia, backups externos y recorrido completo. Presupuesto y pasos concretos en DEPLOYMENT.md. Ratificar el alcance comercial antes de operar con reservas reales.
