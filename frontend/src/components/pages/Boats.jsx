@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 import useResource from '../../lib/useResource';
+import BoatCover from '../BoatCover';
 
 export default function Boats() {
   const [params, setParams] = useSearchParams();
@@ -21,20 +22,26 @@ export default function Boats() {
     next.set('page', String(nextPage));
     setParams(next);
   }
-  return <section><p className="eyebrow">Encontrá tu próxima salida</p><h1>Explorar botes</h1>
-    <p>Conocé los botes de nuestra comunidad y sus tarifas por día.</p>
+  return <section>
+    <div className="catalog-hero"><div className="hero-copy">
+      <p className="eyebrow">Bajá el ritmo. Soltá amarras.</p><h1>Explorar botes</h1>
+      <p className="hero-description">Tu próximo día empieza en el agua.</p>
+      <p>Elegí un puerto, encontrá tu bote y reservá un día para desconectar.</p>
+      <div className="hero-notes"><span>Bote completo</span><span>Tarifas en USD</span><span>Reserva por días</span></div>
+    </div><img className="hero-art" src="/illustrations/harbor.svg" alt="" width="1000" height="650" /></div>
     <form className="catalog-filters" onSubmit={filter} key={params.toString()} aria-label="Filtrar botes">
       <div><label htmlFor="filter-port">Puerto</label><input id="filter-port" name="port" maxLength={150} defaultValue={params.get('port') || ''} placeholder="Por ejemplo, Tigre" /></div>
       <div><label htmlFor="filter-capacity">Personas</label><input id="filter-capacity" name="min_capacity" type="number" min="1" max="500" step="1" defaultValue={params.get('min_capacity') || ''} placeholder="Capacidad mínima" /></div>
-      <button type="submit">Buscar botes</button><button type="button" onClick={() => setParams({})}>Limpiar filtros</button>
+      <button type="submit" className="primary">Buscar botes</button><button type="button" onClick={() => setParams({})}>Limpiar filtros</button>
     </form>
     {loading && <p role="status">Cargando botes…</p>}
     {error && <div><p role="alert">{error}</p><button onClick={reload}>Reintentar</button></div>}
     {data?.length === 0 && <p>{hasFilters ? 'No encontramos botes con esos filtros.' : page > 1 ? 'No hay botes en esta página.' : <>Todavía no hay botes publicados. <Link to="/add-boat">Publicá el primero</Link>.</>}</p>}
-    <div className="boat-grid">{data?.map(boat => <article className="boat-card" key={boat.id}>
-      {boat.photos?.[0] ? <img className="boat-cover" src={boat.photos[0].url} alt={boat.name} loading="lazy" /> : <span className="boat-mark" aria-hidden="true">⛵</span>}<h2><Link to={'/boats/' + boat.id}>{boat.name}</Link></h2>
-      <p>{boat.port} · Hasta {boat.capacity} personas</p><p>{boat.description}</p>
-      <strong>{(boat.daily_rate_cents / 100).toFixed(2)} {boat.currency} / día</strong>
+    {meta && <p className="results-summary" role="status">{meta.total} {meta.total === 1 ? 'bote para descubrir' : 'botes para descubrir'}</p>}
+    <div className="boat-grid">{data?.map(boat => <article className="boat-card catalog-card" key={boat.id}>
+      <BoatCover boat={boat} /><div className="card-content"><p className="eyebrow">{boat.port}</p><h2><Link to={'/boats/' + boat.id}>{boat.name}</Link></h2>
+      <p>Hasta {boat.capacity} personas · Bote completo</p>
+      <div className="card-bottom"><strong>{(boat.daily_rate_cents / 100).toFixed(2)} {boat.currency} <span>/ día</span></strong><Link to={'/boats/' + boat.id} aria-label={'Ver ' + boat.name}>Ver bote →</Link></div></div>
     </article>)}</div>
     {meta && meta.total > meta.per_page && <nav aria-label="Paginación">
       <button disabled={page === 1} onClick={() => setPage(page - 1)}>Anterior</button>
