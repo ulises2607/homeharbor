@@ -25,8 +25,8 @@ export default function ReservationDetails() {
   if (error) return <div><p role="alert">{error}</p><button onClick={reload}>Reintentar</button><Link to="/my-reservations">Volver a Mis reservas</Link></div>;
   return <article><Link to="/my-reservations">← Mis reservas</Link><h1>Reserva #{data.id}</h1>
     {notice && <p role="status">{notice}</p>}{failure && <p role="alert">{failure}</p>}
-    <h2>{data.boat.name}</h2><p>{data.status === 'confirmed' ? 'Confirmada' : 'Cancelada'} · {data.boat.port}</p>
-    <dl><dt>Primer día de uso</dt><dd>{dateLabel(data.starts_on)} · 00:00 UTC−3</dd>
+    <h2>{data.boat.name}</h2><p className={'status-badge ' + data.status}>{data.status === 'confirmed' ? 'Confirmada' : 'Cancelada'} · {data.boat.port}</p>
+    <dl className="reservation-facts"><dt>Primer día de uso</dt><dd>{dateLabel(data.starts_on)} · 00:00 UTC−3</dd>
       <dt>Disponible nuevamente desde</dt><dd>{dateLabel(data.ends_on)} · 00:00 UTC−3 (no incluido)</dd>
       <dt>Duración y pasajeros</dt><dd>{data.days} días · {data.passengers} personas</dd>
       <dt>Tarifa acordada</dt><dd>{money(data.daily_rate_cents, data.currency)} / día</dd>

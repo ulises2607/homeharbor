@@ -1,0 +1,15 @@
+HOMEHARBOR — <%= @title %> #<%= @reservation.id %>
+<%= @reservation.boat.name %>
+<% if @owner_view %>Cliente: <%= @reservation.user.name %><% end %>
+Primer día: <%= @reservation.starts_on.strftime("%d/%m/%Y") %>
+Disponible nuevamente desde: <%= @reservation.ends_on.strftime("%d/%m/%Y") %> (fin no incluido).
+<%= @reservation.days %> días · <%= @reservation.passengers %> pasajeros · UTC−3.
+Total acordado: <%= format("%.2f", @reservation.total_cents / 100.0) %> USD. Esta versión no procesa pagos.
+<% if @notification.event == "cancelled" %>
+Se liberaron las fechas y se conserva el historial.
+<% elsif @reservation.status == "cancelled" %>
+Este aviso corresponde a la confirmación original. La reserva fue cancelada posteriormente.
+<% else %>
+Cancelación permitida hasta el <%= @deadline %> UTC−3, inclusive.
+<% end %>
+Ver la reserva (requiere sesión): <%= @link %>

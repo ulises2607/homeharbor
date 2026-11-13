@@ -17,7 +17,7 @@ jobs:
           POSTGRES_DB: homeharbor_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U homeharbor"
+          --health-cmd "pg_isready -U homeharbor -d homeharbor_test"
           --health-interval 10s --health-timeout 5s --health-retries 5
     env:
       RAILS_ENV: test
@@ -52,3 +52,38 @@ jobs:
       - run: npm test
       - run: npm run build
       - run: npm audit --audit-level=high
+  container:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6
+        env:
+          POSTGRES_USER: homeharbor
+          POSTGRES_PASSWORD: ci-only-password
+          POSTGRES_DB: homeharbor_production
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U homeharbor -d homeharbor_production"
+          --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgres://homeharbor:ci-only-password@localhost:5432/homeharbor_production
+      FRONTEND_URL: https://demo.example.test
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build -t homeharbor:ci .
+      - name: Migrate and verify production routes
+        run: |
+          export SECRET_KEY_BASE="$(openssl rand -hex 64)"
+          docker run --rm --network host -e DATABASE_URL -e SECRET_KEY_BASE -e FRONTEND_URL homeharbor:ci ruby bin/rails db:prepare
+          docker run -d --name homeharbor-ci --network host -e DATABASE_URL -e SECRET_KEY_BASE -e FRONTEND_URL homeharbor:ci
+          curl --fail --retry 20 --retry-delay 1 --retry-connrefused http://localhost:3000/up
+          for path in / /boats/1 /login /signup; do
+            curl --fail --silent -H 'Accept: text/html' -H 'X-Forwarded-Proto: https' "http://localhost:3000$path" > /tmp/homeharbor-response
+            grep -q 'id="root"' /tmp/homeharbor-response
+          done
+          for path in /api/v1/boats /api/v1/session/csrf; do
+            curl --fail --silent -H 'Accept: application/json' -H 'X-Forwarded-Proto: https' "http://localhost:3000$path" > /tmp/homeharbor-response
+            python -c 'import json; assert "data" in json.load(open("/tmp/homeharbor-response"))'
+          done
+      - if: failure()
+        run: docker logs homeharbor-ci || true

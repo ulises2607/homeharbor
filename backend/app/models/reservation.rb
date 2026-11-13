@@ -1,6 +1,7 @@
 class Reservation < ApplicationRecord
   belongs_to :user
   belongs_to :boat
+  has_many :reservation_notifications, dependent: :restrict_with_error
   attr_readonly :user_id, :boat_id, :starts_on, :ends_on, :passengers, :daily_rate_cents,
     :total_cents, :currency, :time_zone, :idempotency_key, :request_fingerprint
 

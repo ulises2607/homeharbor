@@ -7,6 +7,7 @@ class CancelReservation
             raise ReservationError.new(:cancellation_closed, "El plazo para cancelar terminó: se requieren al menos 24 horas antes del inicio.")
           end
           reservation.update!(status: "cancelled", cancelled_at: Time.current)
+          ReservationNotification.record!(reservation, event: "cancelled")
         end
       end
     end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_12_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gist"
   enable_extension "pg_catalog.plpgsql"
@@ -61,6 +61,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_020000) do
     t.check_constraint "currency::text = 'USD'::text", name: "boats_usd_currency"
     t.check_constraint "daily_rate_cents > 0", name: "boats_positive_rate"
     t.check_constraint "time_zone::text = 'Etc/GMT+3'::text", name: "boats_fixed_time_zone"
+  end
+
+  create_table "reservation_notifications", force: :cascade do |t|
+    t.bigint "reservation_id", null: false
+    t.string "event", null: false
+    t.string "audience", null: false
+    t.integer "attempts", default: 0, null: false
+    t.datetime "available_at", null: false
+    t.datetime "delivered_at"
+    t.datetime "failed_at"
+    t.string "last_error"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["available_at"], name: "index_reservation_notifications_pending", where: "((delivered_at IS NULL) AND (failed_at IS NULL))"
+    t.index ["reservation_id", "event", "audience"], name: "index_reservation_notifications_on_event_recipient", unique: true
+    t.index ["reservation_id"], name: "index_reservation_notifications_on_reservation_id"
+    t.check_constraint "(event::text = ANY (ARRAY['confirmed'::character varying, 'cancelled'::character varying]::text[])) AND (audience::text = ANY (ARRAY['customer'::character varying, 'owner'::character varying]::text[]))", name: "reservation_notifications_valid_event"
+    t.check_constraint "attempts >= 0", name: "reservation_notifications_valid_attempts"
   end
 
   create_table "reservations", force: :cascade do |t|
@@ -125,6 +143,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_12_020000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "boats", "users", column: "owner_id"
+  add_foreign_key "reservation_notifications", "reservations"
   add_foreign_key "reservations", "boats"
   add_foreign_key "reservations", "users"
 end

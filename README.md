@@ -2,6 +2,10 @@
 
 Plataforma para publicar y reservar botes completos por días, evolución de Reserve Boats, el proyecto grupal de Microverse.
 
+[Caso de estudio y demo ES/EN](docs/demo/README.md) · [Texto para portfolio](docs/demo/PORTFOLIO.md) · [Despliegue y operación](docs/DEPLOYMENT.md)
+
+![Catálogo de Homeharbor, captura de la demo local](docs/demo/screenshots/01-catalog-desktop.jpg)
+
 ## Un repositorio, dos aplicaciones
 
 - `backend/`: Rails 8.1.4.1, Ruby 4.0.9, Devise 5.0.4 y PostgreSQL 18.6.
@@ -20,7 +24,9 @@ Catálogo público con filtros por puerto y capacidad, paginación y fotos. Publ
 
 Reservas de botes completos por días: disponibilidad pública, cotización en USD calculada por Rails, confirmación, «Mis reservas», historial para el propietario y cancelación hasta 24 horas antes del inicio, inclusive. Del 10 al 12 se ocupan los días 10 y 11; el inicio es a las 00:00 UTC−3. PostgreSQL impide solapamientos y los reintentos recuperan la misma operación. El precio acordado y el historial se conservan aunque cambie o se desactive la publicación.
 
-Se implementó la propuesta inicial del MVP: confirmación automática sin cobros ni gestión separada de capitán. **Pendiente:** cerrar esas decisiones de alcance, avisos por correo de reservas, entrega SMTP real, revisión móvil/accesibilidad completa y despliegue.
+Los avisos de confirmación y cancelación se guardan con la reserva y un worker los entrega con reintentos. Un fallo de correo no deshace la operación. Catálogo, detalle y comprobante tienen diseño adaptable a móvil, navegación con teclado e ilustraciones identificadas como tales. [Evidencia y límites de E5](docs/E5_DEMO_PORTFOLIO.md).
+
+Se implementó la propuesta inicial del MVP: confirmación automática sin cobros ni gestión separada de capitán. **Pendiente para una URL pública:** contratar/configurar hosting y dominio, verificar SMTP real, HTTPS y el recorrido desplegado. Docker y la operación están preparados y probados localmente. Ratificar el alcance comercial antes de uso real.
 
 ## Arranque estándar
 
@@ -55,6 +61,8 @@ Abrir `http://127.0.0.1:5173`. Vite reenvía `/api` a Rails en el puerto 3001; e
 ### Correo local y confirmación
 
 En desarrollo los mensajes se guardan en `backend/tmp/mails/`, sin enviarlos por Internet. Después de registrar una cuenta, ejecutar desde `backend/` el comando `ruby bin/mail-preview.rb correo@ejemplo.com`. Abrir el archivo HTML que indica ese comando y seguir el enlace. El helper decodifica el formato de correo, incluidos los saltos de línea de Windows. La página requiere presionar «Confirmar correo». El enlace vence en 3 días; la recuperación de contraseña, en 6 horas.
+
+Para los avisos de reservas, iniciar `ruby bin/rails notifications:work` en otra terminal con el mismo entorno y FRONTEND_URL. `notifications:deliver` procesa un lote y `notifications:status` muestra contadores. El visor abre el último correo anexado por destinatario. [Reintentos y operación](docs/E5_DEMO_PORTFOLIO.md).
 
 En producción deben configurarse `FRONTEND_URL`, `MAILER_FROM`, `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` y `SMTP_PASSWORD`. El proveedor y su entrega real no se han verificado. Los límites por IP son por proceso; antes de escalar a varios procesos se requiere un límite compartido o en el proxy. El bloqueo por cinco contraseñas incorrectas se guarda en PostgreSQL.
 
@@ -105,9 +113,9 @@ npm audit
 
 El helper portable acepta `-Environment test`. Las pruebas Rails habilitan CSRF real y comprueban dos cuentas, propiedad, expiración, bloqueo, confirmación y recuperación. Las de React comprueban solicitudes, errores, sesiones vencidas y ausencia de éxitos falsos.
 
-La entrega de reservas pasó 45 pruebas Rails (343 comprobaciones), 23 pruebas React, carga de clases, lint y build. Incluye conexiones PostgreSQL concurrentes, límite exacto de cancelación y recuperación de una respuesta perdida sin duplicar reservas. Ver [evidencia y límites de E4/E5](docs/E4_RESERVAS.md).
+La entrega de portfolio reúne 53 pruebas Rails (393 comprobaciones), 23 pruebas React, carga de clases, lint y build. Incluye conexiones PostgreSQL concurrentes, límite exacto de cancelación, recuperación de una respuesta perdida, avisos con reintentos y visor de correo. Docker incorpora un check adicional en CI. Ver [evidencia y límites](docs/E5_DEMO_PORTFOLIO.md).
 
-El Dockerfile del backend se construye con `docker build -t homeharbor-api ./backend`; el motor local está detenido y esta imagen no se ha construido. El despliegue deberá servir el frontend y reenviar `/api` al backend bajo el mismo origen.
+El Dockerfile raíz se construye con `docker build -t homeharbor:local .`; empaqueta Rails y el frontend compilado bajo el mismo origen. Esta imagen fue construida y probada localmente con PostgreSQL aislado. Para despliegue usar [deploy/compose.yaml](deploy/compose.yaml) y la [guía de operación](docs/DEPLOYMENT.md).
 
 ## Documentación y origen
 

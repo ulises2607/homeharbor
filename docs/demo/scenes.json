@@ -1,0 +1,80 @@
+[
+  {
+    "file": "01-catalog-desktop.jpg",
+    "es": [
+      "Un producto de reservas completo",
+      "Explorar botes por puerto y capacidad. React + Rails + PostgreSQL."
+    ],
+    "en": [
+      "A complete booking workflow",
+      "Browse boats by port and capacity. React + Rails + PostgreSQL."
+    ]
+  },
+  {
+    "file": "02-quote-desktop.jpg",
+    "es": [
+      "Disponibilidad y precio claros",
+      "Dos días, cuatro pasajeros, USD 240. El total se calcula en el servidor."
+    ],
+    "en": [
+      "Clear availability and pricing",
+      "Two days, four guests, USD 240. Pricing is calculated on the server."
+    ]
+  },
+  {
+    "file": "03-confirmed-desktop.jpg",
+    "es": [
+      "Confirmación con reglas consistentes",
+      "Precio acordado, fechas en UTC−3 y prevención de reservas superpuestas."
+    ],
+    "en": [
+      "Booking with consistent rules",
+      "Agreed pricing, dates in UTC−3 and database-enforced overlap prevention."
+    ]
+  },
+  {
+    "file": "04-owner-desktop.jpg",
+    "es": [
+      "Un panel para el propietario",
+      "Publicaciones e historial propios. Los permisos se validan en la API."
+    ],
+    "en": [
+      "An owner's view",
+      "Own listings and booking history. Permissions are enforced by the API."
+    ]
+  },
+  {
+    "file": "05-cancelled-desktop.jpg",
+    "es": [
+      "Cancelar sin perder el historial",
+      "Hasta 24 horas antes. Las fechas vuelven a quedar disponibles."
+    ],
+    "en": [
+      "Cancellation without losing history",
+      "Up to 24 hours before the start. Availability is released."
+    ]
+  },
+  {
+    "file": "08-cancellation-email.jpg",
+    "es": [
+      "Avisos que toleran fallos",
+      "Intenciones guardadas en PostgreSQL y reintentos separados de la reserva."
+    ],
+    "en": [
+      "Notifications that tolerate failures",
+      "PostgreSQL stores delivery intent. Email retries do not undo a booking."
+    ]
+  },
+  {
+    "file": "06-catalog-mobile.jpg",
+    "second": "07-availability-mobile.jpg",
+    "es": [
+      "También en móvil",
+      "Recorrido probado con dos cuentas, 53 pruebas Rails y 23 pruebas React."
+    ],
+    "en": [
+      "Built for mobile too",
+      "Two-account browser walkthrough, 53 Rails tests and 23 React tests."
+    ]
+  }
+]

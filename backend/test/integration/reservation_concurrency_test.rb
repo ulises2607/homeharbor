@@ -15,6 +15,7 @@ class ReservationConcurrencyTest < ActiveSupport::TestCase
     @attributes = { boat_id: @boats.first.id, starts_on: first.iso8601, ends_on: (first + 2).iso8601, passengers: 4, expected_total_cents: 20000, expected_currency: "USD" }
   end
   teardown do
+    ReservationNotification.where(reservation_id: Reservation.where(boat_id: @boats.map(&:id)).select(:id)).delete_all
     Reservation.where(boat_id: @boats.map(&:id)).delete_all
     @boats.each { |boat| boat.reload.destroy! }
     @users.each { |user| user.reload.destroy! }

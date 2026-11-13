@@ -32,6 +32,7 @@ class CreateReservation
           end
           reservation = user.reservations.create!(boat: boat, starts_on: request.starts_on, ends_on: request.ends_on,
             passengers: request.passengers, **quote.except(:days), idempotency_key: key, request_fingerprint: request.fingerprint)
+          ReservationNotification.record!(reservation, event: "confirmed")
           result = [reservation, true]
         end
       end
