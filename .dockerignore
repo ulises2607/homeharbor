@@ -1,0 +1,14 @@
+.git
+.tools
+**/node_modules
+**/vendor/bundle
+**/tmp
+**/log
+**/storage
+**/.bundle
+**/dist
+**/.env*
+**/master.key
+**/*.key
+docs/demo
+artifacts

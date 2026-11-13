@@ -26,4 +26,8 @@ Rails.application.routes.draw do
       end
     end
   end
+  root "frontend#index"
+  get "*path", to: "frontend#index", constraints: ->(request) {
+    request.format.html? && !request.path.start_with?("/api", "/rails", "/users")
+  }
 end

@@ -12,3 +12,7 @@ backend/bin/* text eol=lf
 .githooks/* text eol=lf
 *.rb text eol=lf
 *.yml text eol=lf
+
+backend/Gemfile.lock text eol=lf
+Dockerfile text eol=lf
+*.sh text eol=lf

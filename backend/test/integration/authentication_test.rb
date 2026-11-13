@@ -272,8 +272,12 @@ class AuthenticationTest < ActionDispatch::IntegrationTest
   end
 
   test "parallel HTML authentication and insecure original endpoints are absent" do
-    ["/users/sign_in", "/login", "/signup", "/api/v1/users"].each do |path|
+    ["/users/sign_in", "/api/v1/users"].each do |path|
       assert_raises(ActionController::RoutingError) { Rails.application.routes.recognize_path(path) }
+    end
+    ["/login", "/signup"].each do |path|
+      assert_equal "frontend", Rails.application.routes.recognize_path(path)[:controller]
+      assert_raises(ActionController::RoutingError) { Rails.application.routes.recognize_path(path, method: :post) }
     end
   end
 end

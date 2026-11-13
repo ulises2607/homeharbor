@@ -50,6 +50,8 @@ Rails.application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   config.force_ssl = true
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"] == "true"
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new(STDOUT)
@@ -77,7 +79,8 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     address: ENV["SMTP_ADDRESS"], port: ENV.fetch("SMTP_PORT", "587").to_i,
     user_name: ENV["SMTP_USERNAME"], password: ENV["SMTP_PASSWORD"],
-    authentication: :plain, enable_starttls_auto: true
+    authentication: ENV.fetch("SMTP_AUTH", "plain") == "none" ? nil : :plain,
+    enable_starttls_auto: true, open_timeout: 10, read_timeout: 20
   }
 
   # Ignore bad email addresses and do not raise email delivery errors.
