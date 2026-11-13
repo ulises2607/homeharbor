@@ -1,0 +1,19 @@
+<div style="max-width:600px;margin:auto;font-family:Arial,sans-serif;color:#16313b;line-height:1.6">
+  <p style="color:#136b64;font-weight:bold;letter-spacing:2px">HOMEHARBOR</p>
+  <h1><%= @title %></h1>
+  <p>Operación #<%= @reservation.id %> · <strong><%= @reservation.boat.name %></strong></p>
+  <% if @owner_view %><p>Cliente: <%= @reservation.user.name %></p><% end %>
+  <p>Primer día: <strong><%= @reservation.starts_on.strftime("%d/%m/%Y") %></strong><br>
+  Disponible nuevamente desde: <strong><%= @reservation.ends_on.strftime("%d/%m/%Y") %></strong> (fin no incluido).<br>
+  <%= @reservation.days %> días · <%= @reservation.passengers %> pasajeros · UTC−3.</p>
+  <p>Total acordado: <strong><%= format("%.2f", @reservation.total_cents / 100.0) %> USD</strong>. Esta versión no procesa pagos.</p>
+  <% if @notification.event == "cancelled" %>
+    <p>Se liberaron las fechas. La operación permanece en el historial.</p>
+  <% elsif @reservation.status == "cancelled" %>
+    <p>Este aviso corresponde a la confirmación original. La reserva fue cancelada posteriormente; consultá su estado actualizado.</p>
+  <% else %>
+    <p>Cancelación permitida hasta el <%= @deadline %> UTC−3, inclusive.</p>
+  <% end %>
+  <p><a href="<%= @link %>" style="color:#136b64">Ver la reserva en Homeharbor</a></p>
+  <p style="font-size:12px;color:#5a716e">El enlace requiere iniciar sesión. Homeharbor · Plataforma de reservas por días.</p>
+</div>
